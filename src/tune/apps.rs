@@ -8,10 +8,15 @@ use crate::host::report::Report;
 use crate::phone::adb::Adb;
 use crate::phone::brands::Brand;
 use crate::phone::info::DeviceInfo;
+use crate::phone::packages;
 use crate::removal::lists;
 use crate::ui;
 
-const BACKGROUND_OP: &str = "RUN_ANY_IN_BACKGROUND";
+pub const BACKGROUND_OP: &str = "RUN_ANY_IN_BACKGROUND";
+/// The older background switch that apps built for Android 7 or older obey.
+pub const LEGACY_BACKGROUND_OP: &str = "RUN_IN_BACKGROUND";
+/// Android 8 (API 26) introduced the newer switch.
+const LEGACY_TARGET_SDK: i32 = 26;
 const NOTIFICATION_PERMISSION: &str = "android.permission.POST_NOTIFICATIONS";
 /// Android 13 made notifications a runtime permission.
 const NOTIFICATION_PERMISSION_SDK: i32 = 33;
@@ -51,18 +56,48 @@ pub fn remove_packages(adb: &Adb, report: &Report, items: &[(String, String)]) -
     count
 }
 
+/// Is the package on the battery-optimization allowlist because someone added it ("user,<pkg>,<uid>" in
+/// `cmd deviceidle whitelist`)? System entries belong to the maker and stay.
+pub fn in_user_allowlist(list: &str, pkg: &str) -> bool {
+    list.lines().any(|l| {
+        let mut fields = l.trim().split(',');
+        fields.next() == Some("user") && fields.next() == Some(pkg)
+    })
+}
+
 impl Tweaks<'_> {
-    /// Stop an app from running in the background; the previous mode is recorded for Restore.
+    /// Android's own "Restricted" battery mode, as its Settings app sets it: no background work, off the
+    /// battery allowlist, and the older switch too for apps built for Android 7 or older. Every previous
+    /// state is recorded for Restore.
     pub fn set_background_restricted(&mut self, pkg: &str) -> bool {
-        let old = parse_appops_mode(&self.adb.sh(&format!("cmd appops get {pkg} {BACKGROUND_OP}")), BACKGROUND_OP);
+        let ok = self.deny_op(pkg, BACKGROUND_OP, "background.tsv");
+        if ok {
+            self.leave_battery_allowlist(pkg);
+            if packages::target_sdk(self.adb, pkg).is_some_and(|t| t < LEGACY_TARGET_SDK) {
+                self.deny_op(pkg, LEGACY_BACKGROUND_OP, "background-legacy.tsv");
+            }
+        }
+        ok
+    }
+
+    /// Set an app op to `ignore`; the old mode goes to `file` as "pkg<TAB>old".
+    fn deny_op(&mut self, pkg: &str, op: &str, file: &str) -> bool {
+        let old = parse_appops_mode(&self.adb.sh(&format!("cmd appops get {pkg} {op}")), op);
         if old == "ignore" {
             return true;
         }
-        let ok = self.change(&format!("cmd appops set {pkg} {BACKGROUND_OP} ignore"));
+        let ok = self.change(&format!("cmd appops set {pkg} {op} ignore"));
         if ok {
-            self.report.append("background.tsv", &format!("{pkg}\t{old}"));
+            self.report.append(file, &format!("{pkg}\t{old}"));
         }
         ok
+    }
+
+    fn leave_battery_allowlist(&mut self, pkg: &str) {
+        let listed = in_user_allowlist(&self.adb.sh("cmd deviceidle whitelist"), pkg);
+        if listed && self.change(&format!("cmd deviceidle whitelist -{pkg}")) {
+            self.report.append("battery-allowlist.tsv", pkg);
+        }
     }
 
     /// Turn notifications off and stop the app from asking again (Android 13+).

@@ -31,3 +31,12 @@ fn apps_android_already_compiled_are_left_alone() {
     assert_eq!(line.state, CompileState::AlreadyCompiled);
     assert_eq!(line.package, "com.android.settings");
 }
+
+#[test]
+fn only_user_added_battery_allowlist_entries_can_be_removed() {
+    let list =
+        "system-excidle,com.android.shell,2000\nsystem,com.google.android.gms,10123\nuser,com.example.chat,10234\n";
+    assert!(apps::in_user_allowlist(list, "com.example.chat"));
+    assert!(!apps::in_user_allowlist(list, "com.google.android.gms"), "system entries stay");
+    assert!(!apps::in_user_allowlist(list, "com.example"), "whole names only");
+}

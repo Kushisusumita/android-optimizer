@@ -16,6 +16,16 @@ pub fn launchable(adb: &Adb) -> HashSet<String> {
     parse_launchable(&adb.sh(LAUNCHER_QUERY))
 }
 
+/// The Android version (API level) an app was built for, from `dumpsys package <pkg>` ("targetSdk=25").
+pub fn parse_target_sdk(dump: &str) -> Option<i32> {
+    let rest = &dump[dump.find("targetSdk=")? + "targetSdk=".len()..];
+    rest.split(|c: char| !c.is_ascii_digit()).next()?.parse().ok()
+}
+
+pub fn target_sdk(adb: &Adb, pkg: &str) -> Option<i32> {
+    parse_target_sdk(&adb.sh(&format!("dumpsys package {pkg} | grep -m1 targetSdk=")))
+}
+
 /// Package-name prefixes that belong to Android itself, Google, or a device maker (installed without a
 /// store - that is normal, not a malware signal).
 const OEM_COM: &[&str] = &[

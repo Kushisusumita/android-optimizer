@@ -6,6 +6,7 @@ use crate::phone::brands::Brand;
 use crate::phone::packages::Packages;
 use crate::phone::Phone;
 use crate::removal::lists;
+use crate::tune::apps::{BACKGROUND_OP, LEGACY_BACKGROUND_OP};
 use crate::tune::settings::restore_setting;
 use crate::ui;
 use std::collections::BTreeMap;
@@ -108,7 +109,13 @@ pub fn run(phone: &Phone, paths: &Paths, assume_yes: bool) {
         let names: Vec<&str> = bg.iter().map(|(k, _)| k.as_str()).collect();
         if ui::ask_yes_no(&format!("Allow background activity again ({})?", names.join(", ")), true, assume_yes) {
             for (pkg, mode) in &bg {
-                let _ = adb.sh(&format!("cmd appops set {pkg} RUN_ANY_IN_BACKGROUND {mode}"));
+                let _ = adb.sh(&format!("cmd appops set {pkg} {BACKGROUND_OP} {mode}"));
+            }
+            for (pkg, mode) in &report::read_first_values(&dirs, "background-legacy.tsv", 1) {
+                let _ = adb.sh(&format!("cmd appops set {pkg} {LEGACY_BACKGROUND_OP} {mode}"));
+            }
+            for (pkg, _) in &report::read_first_values(&dirs, "battery-allowlist.tsv", 1) {
+                let _ = adb.sh(&format!("cmd deviceidle whitelist +{pkg}"));
             }
             ui::ok("Background activity allowed again");
             if info.brand == Brand::Xiaomi {

@@ -170,3 +170,9 @@ fn reads_which_packages_have_a_home_screen_icon() {
     let icons = packages::parse_launchable("com.a/.Main\n  com.b/com.b.Launcher\n");
     assert_eq!(icons, ["com.a", "com.b"].iter().map(|s| s.to_string()).collect());
 }
+
+#[test]
+fn reads_the_android_version_an_app_was_built_for() {
+    assert_eq!(packages::parse_target_sdk("    versionCode=123 minSdk=21 targetSdk=25\n"), Some(25));
+    assert_eq!(packages::parse_target_sdk("nothing"), None);
+}
