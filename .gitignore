@@ -1,0 +1,31 @@
+# Personal data about the phones that were optimized - never commit
+reports/
+keep/
+
+# Downloaded Android platform-tools
+platform-tools/
+
+# OS and editor junk
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+.vscode/
+.idea/
+*.swp
+
+# AI assistant working dirs and config - keep them out of the project
+.claude/
+.codex/
+.cursor/
+.cursorrules
+.cursorignore
+.aider*
+.continue/
+.windsurf/
+.gemini/
+.github/copilot-instructions.md
+CLAUDE.md
+GEMINI.md
+AGENTS.md
+/target
