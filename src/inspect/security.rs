@@ -8,7 +8,7 @@ use crate::config::APK_INSTALLERS;
 use crate::host::paths::Paths;
 use crate::phone::adb::Adb;
 use crate::phone::info::DeviceInfo;
-use crate::phone::packages::{is_oem, Packages};
+use crate::phone::packages::{self, is_oem, Packages};
 use crate::phone::root::{self, Root};
 use crate::phone::Phone;
 use crate::removal::{candidates, lists};
@@ -79,17 +79,8 @@ fn system_integrity(adb: &Adb, info: &DeviceInfo) -> Vec<String> {
     v
 }
 
-/// Packages that have a home-screen icon, from `cmd package query-activities --brief` output.
-pub fn parse_launchable(dump: &str) -> HashSet<String> {
-    dump.lines().filter_map(|l| l.trim().split_once('/').map(|(p, _)| p.trim().to_string())).collect()
-}
-
 fn app_origins(adb: &Adb, pkgs: &Packages, listed: &HashSet<String>) -> Vec<String> {
-    let launchable =
-        parse_launchable(&adb.sh(
-            "cmd package query-activities --brief -a android.intent.action.MAIN -c android.intent.category.LAUNCHER",
-        ));
-    origin_findings(pkgs, &launchable, listed)
+    origin_findings(pkgs, &packages::launchable(adb), listed)
 }
 
 /// Where third-party apps came from. Preinstalls named in the lists (`listed`) are skipped: makers ship them

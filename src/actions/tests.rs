@@ -42,3 +42,65 @@ fn a_plan_does_only_what_was_chosen() {
     assert!(plan.wants(Change::Animations));
     assert!(!plan.wants(Change::AdBlockDns));
 }
+
+// ---------------------------------------------------------------- results in words
+
+use super::results::{compare, rows, Direction, RunFacts};
+use crate::ui::chart::{Measure, Row, Verdict};
+
+fn measure(
+    score: i32,
+    settings_ms: i64,
+    ram_free_mb: i64,
+    storage_free_mb: i64,
+    packages: usize,
+    compiled: usize,
+) -> Measure {
+    Measure {
+        score,
+        score_label: "excellent",
+        launches: vec![("Settings".to_string(), settings_ms)],
+        ram_free_mb,
+        ram_total_mb: 3686,
+        storage_free_mb,
+        storage_total_mb: 52_634,
+        packages,
+        compiled_icon_apps: (compiled, 23),
+    }
+}
+
+fn row<'a>(rows: &'a [Row], title: &str) -> &'a Row {
+    rows.iter().find(|r| r.title.starts_with(title)).unwrap_or_else(|| panic!("no row {title}"))
+}
+
+#[test]
+fn verdicts_respect_the_direction_and_measurement_noise() {
+    assert_eq!(compare(Direction::LowerIsBetter, 682.0, 613.0, 34.0), Verdict::Better);
+    assert_eq!(compare(Direction::LowerIsBetter, 660.0, 695.0, 33.0), Verdict::Worse);
+    assert_eq!(compare(Direction::LowerIsBetter, 660.0, 680.0, 33.0), Verdict::Same);
+    assert_eq!(compare(Direction::HigherIsBetter, 95.0, 97.0, 1.0), Verdict::Better);
+    assert_eq!(compare(Direction::HigherIsBetter, 95.0, 95.0, 1.0), Verdict::Same);
+}
+
+#[test]
+fn every_result_row_says_in_words_what_changed_and_why() {
+    let before = measure(95, 682, 1536, 43_520, 356, 4);
+    let after = measure(97, 560, 2048, 41_677, 346, 23);
+    let r = rows(&before, &after, &RunFacts { removed: 10, compiled: true });
+    assert_eq!(row(&r, "Health score").verdict, Verdict::Better);
+    assert!(row(&r, "Health score").reason.contains("10 junk apps removed"));
+    assert_eq!(row(&r, "Settings").verdict, Verdict::Better);
+    assert_eq!(row(&r, "Free RAM").verdict, Verdict::Better);
+    assert_eq!(row(&r, "Free storage").verdict, Verdict::Expected);
+    assert!(row(&r, "Free storage").reason.contains("compiled"));
+    assert_eq!(row(&r, "Apps with an icon compiled").verdict, Verdict::Better);
+    assert_eq!(row(&r, "Apps in the system").verdict, Verdict::Better);
+}
+
+#[test]
+fn storage_lost_without_compilation_is_reported_as_worse() {
+    let before = measure(95, 682, 1536, 43_520, 356, 4);
+    let after = measure(95, 682, 1536, 40_000, 356, 4);
+    let r = rows(&before, &after, &RunFacts { removed: 0, compiled: false });
+    assert_eq!(row(&r, "Free storage").verdict, Verdict::Worse);
+}

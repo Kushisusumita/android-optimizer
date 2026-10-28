@@ -1,7 +1,20 @@
 //! The installed package set from `pm list packages`, parsed once into `Packages`.
 
 use super::adb::Adb;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashSet};
+
+const LAUNCHER_QUERY: &str =
+    "cmd package query-activities --brief -a android.intent.action.MAIN -c android.intent.category.LAUNCHER";
+
+/// Packages with a home-screen icon, from `cmd package query-activities --brief` output.
+pub fn parse_launchable(dump: &str) -> HashSet<String> {
+    dump.lines().filter_map(|l| l.trim().split_once('/').map(|(p, _)| p.trim().to_string())).collect()
+}
+
+/// The apps a person can open from the home screen.
+pub fn launchable(adb: &Adb) -> HashSet<String> {
+    parse_launchable(&adb.sh(LAUNCHER_QUERY))
+}
 
 /// Package-name prefixes that belong to Android itself, Google, or a device maker (installed without a
 /// store - that is normal, not a malware signal).

@@ -16,6 +16,12 @@ pub struct Snapshot {
     pub cands: Candidates,
 }
 
+/// How fast and how compiled the apps are at one moment (measured only by the runs that change it).
+pub struct Speed {
+    pub launches: Vec<(String, i64)>,
+    pub compiled_icon_apps: (usize, usize),
+}
+
 pub fn find_candidates(s: &Session, pkgs: &Packages) -> Candidates {
     let keep: HashSet<String> = lists::read_patterns(&s.paths.keep_file(&s.phone.info.device_id)).into_iter().collect();
     let exclude: HashSet<String> = s.opts.exclude.iter().cloned().collect();
@@ -40,14 +46,15 @@ pub fn show(s: &Session, snap: &Snapshot) {
     ui::step(&format!("Health score: {points}/100 ({})", score::label(points)));
 }
 
-/// The snapshot condensed for the chart, with the app start time measured at the same moment.
-pub fn measure(snap: &Snapshot, launch_ms: Option<i64>) -> Measure {
+/// The snapshot condensed for the results, with the speed measured at the same moment.
+pub fn measure(snap: &Snapshot, speed: &Speed) -> Measure {
     let points = score::score(&snap.diag, snap.cands.junk_count());
     let d = &snap.diag;
     Measure {
         score: points,
         score_label: score::label(points),
-        launch_ms,
+        launches: speed.launches.clone(),
+        compiled_icon_apps: speed.compiled_icon_apps,
         ram_free_mb: d.ram_free_mb,
         ram_total_mb: d.ram_total_mb,
         storage_free_mb: d.storage.as_ref().map(|s| s.free_mb).unwrap_or(0),

@@ -1,3 +1,4 @@
+use super::cleanup::CompileState;
 use super::{apps, cleanup, settings};
 
 #[test]
@@ -18,8 +19,15 @@ fn display_size_never_squeezes_the_screen_below_320dp() {
 #[test]
 fn parses_compile_progress_lines() {
     let ok = cleanup::parse_compile_line("12/47 OK com.pkg").unwrap();
-    assert_eq!((ok.index, ok.total, ok.ok, ok.package.as_str()), (12, 47, true, "com.pkg"));
-    assert!(!cleanup::parse_compile_line("3/5 -- com.x").unwrap().ok);
+    assert_eq!((ok.index, ok.total, ok.state, ok.package.as_str()), (12, 47, CompileState::Compiled, "com.pkg"));
+    assert_eq!(cleanup::parse_compile_line("3/5 -- com.x").unwrap().state, CompileState::Failed);
     assert!(cleanup::parse_compile_line("1/2 FAIL com.x").is_none());
     assert!(cleanup::parse_compile_line("garbage").is_none());
+}
+
+#[test]
+fn apps_android_already_compiled_are_left_alone() {
+    let line = cleanup::parse_compile_line("4/23 == com.android.settings").unwrap();
+    assert_eq!(line.state, CompileState::AlreadyCompiled);
+    assert_eq!(line.package, "com.android.settings");
 }

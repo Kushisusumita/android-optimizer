@@ -44,16 +44,20 @@ numbers to skip some (`--yes` takes them all without asking):
 - Blocks ads and trackers in every app and browser with Private DNS (verified; rolled back if the server is
   unreachable, so your internet never breaks).
 - Turns off ad personalization, speeds up animations, stops constant Wi-Fi/Bluetooth scanning.
-- Clears caches, runs storage TRIM and **fully compiles every app with an icon** — the biggest speed boost
-  after a factory reset.
+- Clears caches, runs storage TRIM and **compiles the apps with an icon that Android has not compiled yet**,
+  right away instead of waiting for the nightly job — the biggest speed boost after a factory reset or a system
+  update. Apps Android already compiled are left alone.
 - **Security check** for viruses and spyware (see [Is it safe?](#is-it-safe)).
 
 Shows you **how the phone is doing**, before and after:
 
 - Hardware: chip, CPU cores and clocks, GPU, RAM; current CPU load and the busiest processes.
 - A **health score** from 0 to 100 (storage, memory, battery wear, heat, a stuck key, leftover junk).
-- A real speed measurement: how long a standard app takes to open from cold.
-- Progress through each stage (`[2/5] … 40% done`), the score so far, and a **before/after chart** at the end.
+- A real speed measurement: how long a few harmless system apps (Settings, Calendar, Clock…) take to open
+  from cold — never your own apps — measured again only after the phone has cooled down.
+- How many apps with an icon are compiled.
+- Progress through each stage (`[2/5] … 40% done`), the score so far, and **before/after results in words**:
+  every row says better, worse, about the same or as expected, and why.
 
 **Asks** about personal choices, never deciding for you: which apps to keep, which heavy apps to limit in
 the background, which apps to silence, and whether to make text bigger (for poor eyesight; unchanged unless
@@ -199,8 +203,11 @@ start.bat [action] [options]        # Windows   (or android-optimizer.exe direct
 
 This software is provided "as is", without warranty of any kind (see [LICENSE](LICENSE)). You use it at
 your own risk and you are responsible for what you remove. Removing or disabling system apps can change how
-a phone behaves; always start with `check` and keep the report so you can `restore`. Ad blocking uses a
-public DNS resolver of your choice. This project is not affiliated with, endorsed by, or connected to
+a phone behaves; always start with `check` and keep the report so you can `restore`. The security check
+is a set of heuristics, not an antivirus: finding nothing does not prove a phone is clean, and infected
+firmware or kernel exploits cannot be seen without root. Speed measurements are approximate: the same app
+can start 10-15% faster or slower at different moments of the day. Ad blocking uses a public DNS resolver
+of your choice. This project is not affiliated with, endorsed by, or connected to
 Google or any device manufacturer; all product names and brands are the property of their owners.
 
 ## Contributing

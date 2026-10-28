@@ -116,9 +116,7 @@ fn lists_device_admins_of_that_block_only() {
 }
 
 #[test]
-fn reads_launcher_icons_and_permission_holders() {
-    let icons = security::parse_launchable("com.a/.Main\n  com.b/com.b.Launcher\n");
-    assert_eq!(icons, ["com.a", "com.b"].iter().map(|s| s.to_string()).collect());
+fn reads_permission_holders() {
     assert_eq!(perms::component_packages("com.a/.S:com.b/com.b.T"), strings(&["com.a", "com.b"]));
     assert!(perms::component_packages("null").is_empty());
     assert_eq!(perms::appops_packages("com.a\ncom.b\nNo operations.\n"), strings(&["com.a", "com.b"]));
@@ -151,4 +149,30 @@ fn finds_the_app_on_screen_and_install_dates() {
     );
     assert_eq!(adsource::install_date("    firstInstallTime=2025-03-14 10:22:01").as_deref(), Some("2025-03-14"));
     assert_eq!(adsource::install_date("nothing"), None);
+}
+
+// ---------------------------------------------------------------- app start speed and compile state
+
+use super::{compiled, speed};
+
+#[test]
+fn finds_an_apps_launcher_activity_and_takes_the_median() {
+    let resolved = "priority=0 preferredOrder=0 match=0x108000\ncom.android.settings/.Settings\n";
+    assert_eq!(
+        speed::parse_component(resolved),
+        Some(("com.android.settings".to_string(), "com.android.settings/.Settings".to_string()))
+    );
+    assert_eq!(speed::parse_component("No activity found"), None);
+    assert_eq!(speed::median(&[682, 737, 672, 680, 682]), Some(682));
+    assert_eq!(speed::median(&[]), None);
+}
+
+#[test]
+fn reads_an_apps_compile_state() {
+    let dump = "Dexopt state:\n  [com.x]\n    path: /system/app/X.apk\n      arm64: [status=speed-profile] [reason=cmdline]\n  BgDexopt state:\n";
+    assert_eq!(compiled::compile_status(dump).as_deref(), Some("speed-profile"));
+    assert_eq!(compiled::compile_status("nothing here"), None);
+    assert!(compiled::is_compiled("speed-profile"));
+    assert!(compiled::is_compiled("speed"));
+    assert!(!compiled::is_compiled("verify"));
 }

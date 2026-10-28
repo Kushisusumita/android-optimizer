@@ -1,7 +1,7 @@
-//! Bars, stage progress and the before/after chart.
+//! Bars, stage progress, and the before/after results with a verdict in words for every row.
 
 use super::style::{paint, Tone};
-use super::{format_mb, say, step};
+use super::{say, step};
 
 const BAR_WIDTH: usize = 24;
 
@@ -31,39 +31,73 @@ impl Progress {
     }
 }
 
-/// One point in time, condensed for the chart.
+/// One point in time, condensed for the results.
 pub struct Measure {
     pub score: i32,
     pub score_label: &'static str,
-    pub launch_ms: Option<i64>,
+    /// (app, cold-start ms) for each probe app that could be measured.
+    pub launches: Vec<(String, i64)>,
     pub ram_free_mb: i64,
     pub ram_total_mb: i64,
     pub storage_free_mb: i64,
     pub storage_total_mb: i64,
     pub packages: usize,
+    /// (compiled, total) apps with a home-screen icon.
+    pub compiled_icon_apps: (usize, usize),
 }
 
-fn row(title: &str, before: (i64, String), after: (i64, String), max: i64) {
-    if max <= 0 {
-        return;
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Verdict {
+    Better,
+    Worse,
+    Same,
+    /// Worse on purpose: the price of something better (compiled code takes storage).
+    Expected,
+}
+
+impl Verdict {
+    fn word(self) -> &'static str {
+        match self {
+            Verdict::Better => "better",
+            Verdict::Worse => "worse",
+            Verdict::Same => "about the same",
+            Verdict::Expected => "as expected",
+        }
     }
-    say(&paint(title, Tone::Strong));
-    let line = |label: &str, (value, text): (i64, String), tone: Tone| {
-        say(&format!("  {label} {} {text}", paint(&bar(value as f64 / max as f64), tone)));
-    };
-    line("before", before, Tone::Before);
-    line("after ", after, Tone::After);
+
+    fn tone(self) -> Tone {
+        match self {
+            Verdict::Better => Tone::Good,
+            Verdict::Worse => Tone::Warning,
+            Verdict::Same | Verdict::Expected => Tone::Muted,
+        }
+    }
 }
 
-pub fn show_chart(before: &Measure, after: &Measure) {
+/// One line of the results: two bars (fraction 0..1 and the value as text) and what it means.
+pub struct Row {
+    pub title: String,
+    pub before: (f64, String),
+    pub after: (f64, String),
+    pub verdict: Verdict,
+    pub reason: String,
+}
+
+pub fn show_results(rows: &[Row]) {
     step("Results");
-    let score = |m: &Measure| (m.score as i64, format!("{}/100 ({})", m.score, m.score_label));
-    row("Health score", score(before), score(after), 100);
-    if let (Some(b), Some(a)) = (before.launch_ms, after.launch_ms) {
-        row("App start time (shorter is faster)", (b, format!("{b} ms")), (a, format!("{a} ms")), b.max(a));
+    for r in rows {
+        let reason = if r.reason.is_empty() { String::new() } else { format!(": {}", r.reason) };
+        say(&format!("{} - {}{reason}", paint(&r.title, Tone::Strong), paint(r.verdict.word(), r.verdict.tone())));
+        say(&format!("  before {} {}", paint(&bar(r.before.0), Tone::Before), r.before.1));
+        say(&format!("  after  {} {}", paint(&bar(r.after.0), Tone::After), r.after.1));
     }
-    let mb = |v: i64| (v, format_mb(v));
-    row("Free RAM", mb(before.ram_free_mb), mb(after.ram_free_mb), before.ram_total_mb);
-    row("Free storage", mb(before.storage_free_mb), mb(after.storage_free_mb), before.storage_total_mb);
-    say(&paint(&format!("Apps in the system: {} -> {}", before.packages, after.packages), Tone::Muted));
+    let count = |v: Verdict| rows.iter().filter(|r| r.verdict == v).count();
+    let summary = format!(
+        "In short: {} better, {} about the same, {} as expected, {} worse",
+        count(Verdict::Better),
+        count(Verdict::Same),
+        count(Verdict::Expected),
+        count(Verdict::Worse)
+    );
+    step(&summary);
 }

@@ -16,23 +16,33 @@ const COMPILE_MIN_BATTERY: i64 = 20;
 /// Android 7+ has the speed compiler this relies on.
 const COMPILE_MIN_SDK: i32 = 24;
 
-/// One line of compile-apps.sh output, "12/47 OK com.pkg" or "12/47 -- com.pkg".
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum CompileState {
+    Compiled,
+    /// Android had compiled it already; left as it is.
+    AlreadyCompiled,
+    /// Still not compiled afterwards (some firmware keeps certain apps interpreted).
+    Failed,
+}
+
+/// One line of compile-apps.sh output: "12/47 OK com.pkg", "12/47 == com.pkg" or "12/47 -- com.pkg".
 pub struct CompileStep {
     pub index: usize,
     pub total: usize,
-    pub ok: bool,
+    pub state: CompileState,
     pub package: String,
 }
 
 pub fn parse_compile_line(line: &str) -> Option<CompileStep> {
     let mut it = line.split_whitespace();
     let (index, total) = it.next()?.split_once('/')?;
-    let ok = match it.next()? {
-        "OK" => true,
-        "--" => false,
+    let state = match it.next()? {
+        "OK" => CompileState::Compiled,
+        "==" => CompileState::AlreadyCompiled,
+        "--" => CompileState::Failed,
         _ => return None,
     };
-    Some(CompileStep { index: index.parse().ok()?, total: total.parse().ok()?, ok, package: it.next()?.to_string() })
+    Some(CompileStep { index: index.parse().ok()?, total: total.parse().ok()?, state, package: it.next()?.to_string() })
 }
 
 pub fn clean_caches(adb: &Adb) {
@@ -46,25 +56,35 @@ pub fn clean_caches(adb: &Adb) {
     ui::ok("Storage maintenance (TRIM) started - keeps writes fast");
 }
 
-/// Compile only the apps the person opens (plus System UI and the home screen) - compiling every system
-/// component would take hours on budget chips. Returns how many were compiled.
-fn full_compile(adb: &Adb) -> usize {
+/// Compile the apps the person opens (plus System UI and the home screen) that Android has not compiled -
+/// compiling every system component would take hours on budget chips. Returns how many were compiled.
+fn compile_uncompiled_apps(adb: &Adb) -> usize {
     let tmp = std::env::temp_dir().join("clearphone-compile.sh");
     if std::fs::write(&tmp, COMPILE_SCRIPT.replace("\r\n", "\n")).is_err() {
         return 0;
     }
     adb.push(&tmp, COMPILE_REMOTE);
-    let mut compiled = 0;
+    let (mut compiled, mut already) = (0, 0);
     adb.shell_stream(&format!("sh {COMPILE_REMOTE}"), |line| {
         if let Some(s) = parse_compile_line(line) {
-            compiled += usize::from(s.ok);
-            let mark = if s.ok { "" } else { " (skipped)" };
+            let mark = match s.state {
+                CompileState::Compiled => {
+                    compiled += 1;
+                    ""
+                }
+                CompileState::AlreadyCompiled => {
+                    already += 1;
+                    " (already compiled by Android)"
+                }
+                CompileState::Failed => " (Android keeps this one uncompiled)",
+            };
             let done = chart::bar(s.index as f64 / s.total.max(1) as f64);
             ui::dim(&format!("{done} {}/{} {}{mark}", s.index, s.total, s.package));
         }
     });
     let _ = adb.sh(&format!("rm -f {COMPILE_REMOTE}"));
     let _ = std::fs::remove_file(&tmp);
+    ui::ok(&format!("Compiled now: {compiled}; already compiled by Android and left as they are: {already}"));
     compiled
 }
 
@@ -75,22 +95,26 @@ fn enough_space_for_full_compile(adb: &Adb) -> bool {
     })
 }
 
-/// Ahead-of-time compile apps so they start and run faster.
-pub fn optimize_apps(adb: &Adb, info: &DeviceInfo, diag: &Diag) {
+/// Ahead-of-time compile the apps Android has not compiled yet. Returns how many were compiled now
+/// (Android's own background job, used when storage is short, counts as one).
+pub fn optimize_apps(adb: &Adb, info: &DeviceInfo, diag: &Diag) -> usize {
     ui::step("App optimization (compiling)");
     if info.sdk < COMPILE_MIN_SDK {
         ui::warn("Needs Android 7 or newer - skipped");
+        0
     } else if diag.battery_level.is_some_and(|l| l < COMPILE_MIN_BATTERY) && !diag.charging {
         ui::warn("Battery below 20% - app optimization skipped (charge the phone and run again)");
+        0
     } else if enough_space_for_full_compile(adb) {
-        ui::say("Fully compiling every app with an icon - they will start and run faster.");
-        ui::dim("Up to an hour on budget phones. Keep the phone connected...");
-        ui::ok(&format!("Fully compiled apps: {}", full_compile(adb)));
+        ui::say("Compiling the apps with an icon that Android has not compiled yet - they will start faster.");
+        ui::dim("Apps Android already compiled are left alone. Up to half an hour on budget phones...");
+        compile_uncompiled_apps(adb)
     } else {
-        ui::warn("Not enough free storage for full compilation - running the standard optimization");
+        ui::warn("Little free storage - running Android's own background optimization instead");
         ui::say("Optimizing (compiling) apps - this may take 5-20 minutes...");
         let _ = adb.sh("cmd package bg-dexopt-job");
         ui::ok("Apps optimized");
+        1
     }
 }
 

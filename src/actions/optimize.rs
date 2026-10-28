@@ -1,5 +1,6 @@
 //! Optimize, Maximum and Check: every question first, then an unattended run in five stages.
 
+use super::results::RunFacts;
 use super::snapshot::Snapshot;
 use super::{questions, steps, Session};
 use crate::config::{self, Action};
@@ -24,7 +25,7 @@ pub fn run(action: Action, s: &Session, before: &Snapshot) {
     let chosen = questions::select_removals(s, &shown);
     let access = questions::settings_access(s);
     let plan = questions::choose_plan(s, &before.pkgs, access.as_ref());
-    let launch = steps::measure_speed(s);
+    let base = steps::baseline(s);
 
     let mut progress = Progress::new(5);
     progress.next("Removing ads and junk");
@@ -42,9 +43,9 @@ pub fn run(action: Action, s: &Session, before: &Snapshot) {
         ui::dim("Skipped (not chosen)");
     }
     progress.next("Compiling apps");
-    steps::compile(s, &before.diag, (!plan.wants(Change::Compile)).then_some("not chosen"));
+    let compiled = steps::compile(s, &before.diag, (!plan.wants(Change::Compile)).then_some("not chosen"));
     progress.next("Measuring the result");
-    steps::finish(s, before, launch);
+    steps::finish(s, before, &base, &RunFacts { removed, compiled: compiled > 0 });
 }
 
 fn show_new_apps(s: &Session, before: &Snapshot) {

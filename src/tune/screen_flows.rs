@@ -6,15 +6,20 @@ use crate::phone::screen::{dump_nodes, scroll, tap_node, UiNode};
 use std::thread::sleep;
 use std::time::Duration;
 
+// The phone's own on-screen text in English, matched literally. On a phone in another language the flow
+// finds nothing, returns false, and the person is shown the steps to do it by hand.
+const XIAOMI_BATTERY_ROW: &[&str] = &["Battery", "Battery saver", "Battery usage"];
+const XIAOMI_CLOSE_AFTER_10_MIN: &[&str] = &["Close apps after 10 minutes"];
+const XIAOMI_NO_RESTRICTIONS: &[&str] = &["No restrictions"];
+const AD_PERSONALIZATION_OPT_OUT: &[&str] = &["Opt out of Ads Personalization", "Opt out of ads personalization"];
+
 /// Xiaomi (PowerKeeper) resets the standard Android background limit on every boot and hides its own
 /// setting from adb, so it is set through App info -> Battery, as a person would. The "Close apps after
 /// 10 minutes" mode survives reboots. "Soft restriction" is never used - despite its wording it stops
 /// ALL background work (music stops).
 pub fn set_xiaomi_background_limit(adb: &Adb, pkg: &str) -> bool {
-    let battery_labels = ["Battery", "Battery saver", "Battery usage"];
-    let mode_labels = ["Close apps after 10 minutes"];
-    let no_limit_labels = ["No restrictions"];
-
+    let (battery_labels, mode_labels, no_limit_labels) =
+        (XIAOMI_BATTERY_ROW, XIAOMI_CLOSE_AFTER_10_MIN, XIAOMI_NO_RESTRICTIONS);
     let _ =
         adb.sh(&format!("am start -f 0x10008000 -a android.settings.APPLICATION_DETAILS_SETTINGS -d package:{pkg}"));
     sleep(Duration::from_secs(3));
@@ -63,7 +68,7 @@ pub fn set_xiaomi_background_limit(adb: &Adb, pkg: &str) -> bool {
 /// Google "Opt out of Ads Personalization" on Play services screens that still have a switch.
 /// Newer screens only offer deleting the advertising ID; that is left to the person.
 pub fn set_ad_personalization_off(adb: &Adb) -> bool {
-    let labels = ["Opt out of Ads Personalization", "Opt out of ads personalization"];
+    let labels = AD_PERSONALIZATION_OPT_OUT;
     let _ = adb.sh("am start -f 0x10008000 -a com.google.android.gms.settings.ADS_PRIVACY");
     sleep(Duration::from_secs(3));
     let nodes = dump_nodes(adb);

@@ -1,17 +1,14 @@
-//! What the phone is built from (SoC, CPU cores and clocks, GPU) and how loaded it is right now,
-//! plus one honest speed measurement: how long a standard app takes to open from cold.
+//! What the phone is built from (SoC, CPU cores and clocks, GPU) and how loaded it is right now.
 
 use super::diagnostics::Diag;
 use crate::phone::adb::Adb;
 use crate::phone::Phone;
 use crate::ui;
-use crate::util::{leading_number, num_after};
+use crate::util::leading_number;
 use std::collections::BTreeMap;
 use std::thread::sleep;
 use std::time::Duration;
 
-/// Cold starts measured; the median is reported so one hiccup does not skew the result.
-const LAUNCH_RUNS: usize = 3;
 const CPU_SAMPLE_MS: u64 = 500;
 const TOP_PROCESSES: usize = 5;
 
@@ -79,7 +76,8 @@ pub fn busy_percent(before: (i64, i64), after: (i64, i64)) -> Option<i64> {
     (total > 0).then(|| (100 * (total - idle) / total).clamp(0, 100))
 }
 
-fn cpu_busy(adb: &Adb) -> Option<i64> {
+/// CPU busy percentage over half a second.
+pub fn cpu_busy(adb: &Adb) -> Option<i64> {
     let first = cpu_times(&adb.sh("cat /proc/stat"))?;
     sleep(Duration::from_millis(CPU_SAMPLE_MS));
     busy_percent(first, cpu_times(&adb.sh("cat /proc/stat"))?)
@@ -133,22 +131,4 @@ pub fn busiest(top: &str) -> Option<Vec<(f64, String)>> {
         .filter(|(cpu, name)| *cpu > 0.0 && name != "top")
         .collect();
     Some(rows)
-}
-
-/// Cold-start time of the Settings app in ms (median of a few runs). Opens Settings briefly.
-pub fn launch_ms(adb: &Adb) -> Option<i64> {
-    let component = adb.sh("cmd package resolve-activity --brief -a android.settings.SETTINGS");
-    let package = component.lines().rev().find_map(|l| l.trim().split_once('/').map(|(p, _)| p.to_string()))?;
-    let mut runs: Vec<i64> = (0..LAUNCH_RUNS)
-        .filter_map(|_| {
-            let _ = adb.sh(&format!("am force-stop {package}"));
-            sleep(Duration::from_millis(800));
-            let out = adb.sh("am start -W -a android.settings.SETTINGS");
-            num_after(&out, "TotalTime:").or_else(|| num_after(&out, "WaitTime:"))
-        })
-        .collect();
-    let _ = adb.sh("input keyevent KEYCODE_HOME");
-    let _ = adb.sh(&format!("am force-stop {package}"));
-    runs.sort_unstable();
-    runs.get(runs.len() / 2).copied()
 }

@@ -18,7 +18,7 @@ cargo run --release -- <action> --yes [flags]            # from source
 |---|---|
 | `optimize` | safe lists + automatic optimizations (default with `--yes`) |
 | `max` | also the `[max]` lists |
-| `speedup` | cache + TRIM + full compilation only. Use after a system update |
+| `speedup` | cache + TRIM + recompiling apps only. Use after a system update |
 | `security` | diagnostics + malware check, changes nothing |
 | `adsource` | the app behind pop-up ads (run while the ad is on screen), changes nothing |
 | `check` | dry run: diagnostics, health score, security check, the plan |
@@ -59,7 +59,7 @@ Root needs no flag: the tool detects existing root by itself (read-only) and sta
 4. **Unknown brand or few matches:** look at `adb shell pm list packages -s` and `pm list packages -3 -i`.
    Add obvious ads, telemetry and partner preinstalls (empty installer or the OEM store) to `lists/<brand>.txt`
    and the brand to `src/phone/brands.rs`, or pass `--include` once. When unsure about a package, leave it.
-5. **Run** `optimize|max --yes ...` in the background (run_in_background). Full compilation of ~50 apps takes
+5. **Run** `optimize|max --yes ...` in the background (run_in_background). Recompiling ~50 apps takes
    up to an hour on budget chips; the output shows a progress bar per app and `[k/5]` per stage.
 6. **Verify.** Report folder `reports/<date>_<brand>_<model>_<action>/`: `device.txt`, `removed.tsv`,
    `tweaks.tsv`, `background.tsv`, `notifications.tsv`, `security.txt`, `skipped.txt`,
@@ -107,19 +107,29 @@ backups can bring removed apps back; run again if they did. Apps restored from t
 
 ## Lessons from real devices
 
-- **Compilation:** after a factory reset ~60% of packages are `status=verify` (not compiled). `compile -a -m speed`
-  takes hours on budget chips (one Google app alone 15+ min, plus 32-bit copies), so the tool compiles only
-  apps with icons + System UI + the home screen (`src/tune/compile-apps.sh`, embedded in the binary). It needs
-  ≥ 8 GB and ≥ 25% free: compiled code took ~6.5 GB on a 256 GB phone. A system update resets compilation
-  (`pm.dexopt.boot-after-ota=verify`); the tool compares the build fingerprint with the last report.
-  Android itself compiles at install (`pm.dexopt.install=speed-profile`) and overnight while charging;
-  making that `speed` needs root (`setprop` is denied).
+- **Compilation:** after a factory reset ~60% of packages are `status=verify` (not compiled). Compiling every
+  package takes hours on budget chips, so the tool looks only at apps with icons + System UI + the home screen
+  (`src/tune/compile-apps.sh`, embedded in the binary) and **compiles only those Android has not compiled**
+  (status not `speed` / `speed-profile` / `everything`): `cmd package compile -m speed-profile -f`, then
+  `-m speed` if the app had no profile and stayed at `verify`. On a Galaxy A12 whose apps came compiled from the
+  factory, recompiling them gave no reliable gain: the same app measured 610-660 ms at different moments.
+  Full `speed` over a good profile can even be slower (Settings: 682 ms after `speed`, 613 ms after
+  `speed-profile -f`), because it drops the app image. Code other apps use is kept at `speed` by Android itself.
+  A system update resets compilation (`pm.dexopt.boot-after-ota=verify`); the tool compares the build
+  fingerprint with the last report. Read an app's state with `dumpsys package <pkg> | grep -A4 'Dexopt state:'`
+  (`reason=cmdline` means a command compiled it).
+- **Measuring speed:** only on harmless system apps found by intent (Settings, APP_CALENDAR, SHOW_ALARMS,
+  APP_CALCULATOR), through their launcher activity: one warm-up, then the median of 5 `am start -W` runs. Never
+  open the person's own apps to measure them - opening can make them act. Measure "after" only when
+  `Thermal Status` is 0 and the CPU is idle. Within one series runs differ by 1-3%, but between moments of the
+  day by 10-15%, so the results treat a change under 10% as "about the same".
 - **Xiaomi background limits:** PowerKeeper resets `RUN_ANY_IN_BACKGROUND` to `allow` on boot and its provider
   is closed to shell. The tool uses App info → Battery → "Close apps after 10 minutes...". Never pick
   "Soft restriction": despite its description it stops ALL background work (music stops). Media apps
   (`@media`) keep "Battery saver (recommended)".
 - **Screen automation:** tap by text via `uiautomator dump` + XML (`src/phone/screen.rs`, flows in `src/tune/screen_flows.rs`), not by guessed
-  coordinates. Read a dialog before pressing anything; `KEYCODE_HOME` cancels it. Launcher folders cannot be
+  coordinates. The labels are English; on a phone in another language the flows find nothing and the tool shows
+  the manual steps instead. Read a dialog before pressing anything; `KEYCODE_HOME` cancels it. Launcher folders cannot be
   created with `input draganddrop` on MIUI (icons just move); ask the person instead. "Cleaner" on a Xiaomi
   home screen is a Security shortcut (`id=cleaner`): long-press → Remove.
 - **Text size:** Android has no per-app font size. A large `font_scale` alone pushes buttons off screen in many
@@ -140,6 +150,8 @@ backups can bring removed apps back; run again if they did. Apps restored from t
 - **Telemetry:** MQS, analytics, MiSight and MTK Logger are fine to remove. Keep `com.xiaomi.mtb`,
   `com.xiaomi.simactivate.service`, `com.miui.audiomonitor` (modem, SIM, audio) and Google mainline modules
   (`adservices`, `mainline.telemetry`). Never turn location off.
+- **toybox grep on the phone:** `grep -m1 -A4 x` stops at the match and prints no context lines - use
+  `grep -A4 x` when you need the lines after it.
 - **Changing the code:** `Adb::sh` passes the whole command as one argument, so the phone's own shell handles
   pipes and redirects. Parse adb output once, in a pure function next to where it comes in, and cover it with
   a test in that layer's `tests.rs` (layers are described in `src/main.rs`). Run `cargo fmt --check && cargo clippy --all-targets -- -D warnings && cargo test`.

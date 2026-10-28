@@ -164,3 +164,9 @@ fn notices_only_real_frequency_caps() {
     assert!(root::is_capped(2_000_000, 1_800_000));
     assert!(!root::is_capped(2_000_000, 1_950_000));
 }
+
+#[test]
+fn reads_which_packages_have_a_home_screen_icon() {
+    let icons = packages::parse_launchable("com.a/.Main\n  com.b/com.b.Launcher\n");
+    assert_eq!(icons, ["com.a", "com.b"].iter().map(|s| s.to_string()).collect());
+}
