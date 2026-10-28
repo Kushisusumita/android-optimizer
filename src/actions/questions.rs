@@ -83,23 +83,21 @@ pub fn offered_changes(info: &DeviceInfo, opts: &Opts, settings_allowed: bool, l
         .collect()
 }
 
-/// Everything the run will do on its own, as one checklist: Enter keeps all, numbers skip those.
-fn confirm_changes(s: &Session, offered: Vec<Change>) -> Vec<Change> {
-    if s.opts.yes || offered.is_empty() {
-        return offered;
+/// The safe changes are made without a question; the person is only told what will happen.
+fn announce_changes(changes: Vec<Change>) -> Vec<Change> {
+    if !changes.is_empty() {
+        ui::step("The run will also do this on its own (all reversible with Restore)");
+        for c in &changes {
+            ui::say(&format!("- {}", c.title()));
+        }
     }
-    ui::step("The run will also do this (all reversible)");
-    let rows: Vec<(String, String, bool)> =
-        offered.iter().map(|c| (c.title().to_string(), String::new(), true)).collect();
-    ui::show_list(&rows);
-    let answer = ui::read_line("Enter - do all of it; numbers (e.g. 1,6) - skip those");
-    ui::split_by_numbers(&offered, &ui::parse_numbers(&answer, offered.len())).1
+    changes
 }
 
 /// The person's choices for this run. Without settings access only cleanup and compilation remain.
 pub fn choose_plan(s: &Session, pkgs: &Packages, access: Option<&Access>) -> Plan {
     let leftovers_found = !leftovers::on_phone(&s.phone.adb).is_empty();
-    let changes = confirm_changes(s, offered_changes(&s.phone.info, &s.opts, access.is_some(), leftovers_found));
+    let changes = announce_changes(offered_changes(&s.phone.info, &s.opts, access.is_some(), leftovers_found));
     if access.is_none() {
         return Plan { changes, ..Plan::default() };
     }

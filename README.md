@@ -35,15 +35,16 @@ download Google's official version.
 
 ## What it does
 
-Safe for everyone — shown first as **one checklist**, all on by default; press Enter to do all of it or type
-numbers to skip some (`--yes` takes them all without asking):
+Done **on its own** — safe for everyone and reversible; the run lists what it is about to do
+(`--no-dns` and `--no-compile` skip those two):
 
 - Removes preinstalled ads, junk and telemetry from per-brand lists in [`lists/`](lists) — e.g. Xiaomi MSA
   ads and analytics, Facebook/Netflix/game preinstalls, silent installers. Apps **you** installed from a
   store are never touched.
 - Blocks ads and trackers in every app and browser with Private DNS (verified; rolled back if the server is
   unreachable, so your internet never breaks).
-- Turns off ad personalization, speeds up animations, stops constant Wi-Fi/Bluetooth scanning.
+- Turns off ad personalization, speeds up animations (unless you changed them yourself), stops constant
+  Wi-Fi/Bluetooth scanning, and undoes settings other "optimizer" apps leave behind that make a phone lag.
 - Clears caches, runs storage TRIM and **compiles the apps with an icon that Android has not compiled yet**,
   right away instead of waiting for the nightly job — the biggest speed boost after a factory reset or a system
   update. Apps Android already compiled are left alone.
@@ -60,8 +61,9 @@ Shows you **how the phone is doing**, before and after:
   every row says better, worse, about the same or as expected, and why.
 
 **Asks** about personal choices, never deciding for you: which apps to keep, which heavy apps to limit in
-the background, which apps to silence, and whether to make text bigger (for poor eyesight; unchanged unless
-you pick a size). All questions come before the run, so after them it needs nobody at the keyboard.
+the background, which apps to silence, and **always** whether to make text bigger (for poor eyesight; it
+stays unchanged unless you pick a size, and `--yes` never changes it). All questions come before the run,
+so after them it needs nobody at the keyboard.
 
 ## Actions
 
