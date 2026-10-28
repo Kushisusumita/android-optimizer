@@ -176,3 +176,31 @@ fn reads_an_apps_compile_state() {
     assert!(compiled::is_compiled("speed"));
     assert!(!compiled::is_compiled("verify"));
 }
+
+// ---------------------------------------------------------------- settings other "optimizers" leave behind
+
+use super::leftovers;
+
+#[test]
+fn finds_only_settings_changed_away_from_healthy() {
+    let phone = |_ns: &str, key: &str| -> String {
+        match key {
+            "always_finish_activities" => "1".into(),
+            "stay_on_while_plugged_in" => "3".into(),
+            "adaptive_battery_management_enabled" => "null".into(),
+            "app_standby_enabled" => "1".into(),
+            "cached_apps_freezer" => "disabled".into(),
+            _ => "null".into(),
+        }
+    };
+    let keys: Vec<&str> = leftovers::found(phone).iter().map(|l| l.key).collect();
+    assert_eq!(keys, vec!["always_finish_activities", "stay_on_while_plugged_in", "cached_apps_freezer"]);
+}
+
+#[test]
+fn a_phone_with_default_settings_needs_no_repair() {
+    assert!(leftovers::found(|_, _| "null".to_string()).is_empty());
+    assert!(leftovers::found(|_, key| if key == "always_finish_activities" { "0".into() } else { "1".into() })
+        .iter()
+        .all(|l| l.key == "stay_on_while_plugged_in"));
+}

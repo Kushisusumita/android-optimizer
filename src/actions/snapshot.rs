@@ -3,7 +3,7 @@
 
 use super::Session;
 use crate::inspect::diagnostics::{self, Diag};
-use crate::inspect::{hardware, score};
+use crate::inspect::{hardware, leftovers, score};
 use crate::phone::packages::Packages;
 use crate::removal::candidates::{self, Candidates, Overrides};
 use crate::removal::lists;
@@ -40,6 +40,9 @@ pub fn show(s: &Session, snap: &Snapshot) {
     ui::step("Phone health");
     diagnostics::show(&snap.diag);
     diagnostics::warnings(&s.phone.adb, &snap.diag, &s.phone.info);
+    for l in leftovers::on_phone(&s.phone.adb) {
+        ui::warn(&format!("A setting slows the phone down: {} (Optimize puts it back)", l.what));
+    }
     hardware::show_specs(&s.phone, &snap.diag);
     hardware::show_load(&s.phone, &snap.diag);
     let points = score::score(&snap.diag, snap.cands.junk_count());

@@ -2,6 +2,7 @@
 
 use super::Session;
 use crate::config::{Opts, TextSize};
+use crate::inspect::leftovers;
 use crate::phone::info::DeviceInfo;
 use crate::phone::packages::Packages;
 use crate::removal::candidates::Candidate;
@@ -69,10 +70,11 @@ pub fn settings_access(s: &Session) -> Option<Access> {
 
 /// The automatic changes worth offering on this phone: they apply to it, the phone lets us make them, and
 /// the command line did not rule them out.
-pub fn offered_changes(info: &DeviceInfo, opts: &Opts, settings_allowed: bool) -> Vec<Change> {
+pub fn offered_changes(info: &DeviceInfo, opts: &Opts, settings_allowed: bool, leftovers_found: bool) -> Vec<Change> {
     let ruled_out = |c: &Change| match c {
         Change::AdBlockDns => opts.no_dns,
         Change::Compile => opts.no_compile,
+        Change::RepairSettings => !leftovers_found,
         _ => false,
     };
     Change::ALL
@@ -96,7 +98,8 @@ fn confirm_changes(s: &Session, offered: Vec<Change>) -> Vec<Change> {
 
 /// The person's choices for this run. Without settings access only cleanup and compilation remain.
 pub fn choose_plan(s: &Session, pkgs: &Packages, access: Option<&Access>) -> Plan {
-    let changes = confirm_changes(s, offered_changes(&s.phone.info, &s.opts, access.is_some()));
+    let leftovers_found = !leftovers::on_phone(&s.phone.adb).is_empty();
+    let changes = confirm_changes(s, offered_changes(&s.phone.info, &s.opts, access.is_some(), leftovers_found));
     if access.is_none() {
         return Plan { changes, ..Plan::default() };
     }

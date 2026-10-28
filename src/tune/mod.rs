@@ -4,6 +4,7 @@
 pub mod adblock;
 pub mod apps;
 pub mod cleanup;
+pub mod repair;
 pub mod screen_flows;
 pub mod settings;
 #[cfg(test)]
@@ -22,6 +23,7 @@ const COMPILE_SDK: i32 = 24;
 /// Every change a run can make on its own, each one offered for confirmation first.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Change {
+    RepairSettings,
     Animations,
     Scanning,
     MobileData,
@@ -33,7 +35,8 @@ pub enum Change {
 }
 
 impl Change {
-    pub const ALL: [Change; 8] = [
+    pub const ALL: [Change; 9] = [
+        Change::RepairSettings,
         Change::Animations,
         Change::Scanning,
         Change::MobileData,
@@ -46,6 +49,9 @@ impl Change {
 
     pub fn title(self) -> &'static str {
         match self {
+            Change::RepairSettings => {
+                "Undo settings that make the phone lag or drain the battery (left by other tools)"
+            }
             Change::Animations => "Faster animations (2x) - the interface feels snappier",
             Change::Scanning => "No constant Wi-Fi/Bluetooth scanning in the background (location still works)",
             Change::MobileData => "Do not keep mobile data on while on Wi-Fi - saves battery",
@@ -92,6 +98,9 @@ impl Plan {
 /// Smoothness, battery, text size, app limits and ad personalization, as far as the plan asks for them.
 pub fn apply(tw: &mut Tweaks, info: &DeviceInfo, plan: &Plan, paths: &Paths) {
     ui::step("Smoothness and battery settings");
+    if plan.wants(Change::RepairSettings) {
+        repair::apply(tw);
+    }
     settings::apply_speed_settings(tw, plan);
     settings::apply_text_size(tw, plan);
     apps::apply_background(tw, info, plan, paths);

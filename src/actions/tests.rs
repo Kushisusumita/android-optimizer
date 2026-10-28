@@ -11,26 +11,26 @@ fn samsung_without_account() -> DeviceInfo {
 
 #[test]
 fn every_automatic_change_is_offered_only_where_it_applies() {
-    let samsung = offered_changes(&samsung_without_account(), &Opts::default(), true);
+    let samsung = offered_changes(&samsung_without_account(), &Opts::default(), true, false);
     assert!(samsung.contains(&Change::Animations));
     assert!(samsung.contains(&Change::AdBlockDns));
     assert!(!samsung.contains(&Change::XiaomiRecommendations), "Xiaomi-only");
     assert!(!samsung.contains(&Change::AdPersonalization), "needs a Google account");
-    let mi = offered_changes(&xiaomi(true), &Opts::default(), true);
+    let mi = offered_changes(&xiaomi(true), &Opts::default(), true, false);
     assert!(mi.contains(&Change::XiaomiRecommendations));
     assert!(mi.contains(&Change::AdPersonalization));
 }
 
 #[test]
 fn without_settings_access_only_cleanup_and_compilation_are_offered() {
-    let offered = offered_changes(&samsung_without_account(), &Opts::default(), false);
+    let offered = offered_changes(&samsung_without_account(), &Opts::default(), false, true);
     assert_eq!(offered, vec![Change::CleanCaches, Change::Compile]);
 }
 
 #[test]
 fn command_line_switches_take_their_change_off_the_list() {
     let opts = Opts { no_dns: true, no_compile: true, ..Opts::default() };
-    let offered = offered_changes(&samsung_without_account(), &opts, true);
+    let offered = offered_changes(&samsung_without_account(), &opts, true, false);
     assert!(!offered.contains(&Change::AdBlockDns));
     assert!(!offered.contains(&Change::Compile));
     assert!(offered.contains(&Change::CleanCaches));
@@ -103,4 +103,11 @@ fn storage_lost_without_compilation_is_reported_as_worse() {
     let after = measure(95, 682, 1536, 40_000, 356, 4);
     let r = rows(&before, &after, &RunFacts { removed: 0, compiled: false });
     assert_eq!(row(&r, "Free storage").verdict, Verdict::Worse);
+}
+
+#[test]
+fn repairing_settings_is_offered_only_when_something_needs_it() {
+    let info = samsung_without_account();
+    assert!(!offered_changes(&info, &Opts::default(), true, false).contains(&Change::RepairSettings));
+    assert!(offered_changes(&info, &Opts::default(), true, true).contains(&Change::RepairSettings));
 }

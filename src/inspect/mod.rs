@@ -5,6 +5,7 @@ pub mod adsource;
 pub mod compiled;
 pub mod diagnostics;
 pub mod hardware;
+pub mod leftovers;
 pub mod perms;
 pub mod score;
 pub mod security;
