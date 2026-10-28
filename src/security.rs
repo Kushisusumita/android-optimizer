@@ -4,6 +4,7 @@
 //! more than any fixed list. `lists/malware.txt` only covers stable, documented families.
 
 use crate::adb::Adb;
+use crate::apps;
 use crate::config::APK_INSTALLERS;
 use crate::device::{is_oem, DeviceInfo, Packages, Phone};
 use crate::lists;
@@ -36,7 +37,7 @@ pub fn audit(phone: &Phone, pkgs: &Packages, paths: &Paths) -> Findings {
     let mut f = Findings::default();
     f.issues.extend(known_malware(pkgs, paths));
     f.issues.extend(system_integrity(adb, &phone.info));
-    f.issues.extend(app_origins(adb, pkgs));
+    f.issues.extend(app_origins(adb, pkgs, &apps::listed_packages(paths, &phone.info, pkgs)));
     f.issues.extend(
         parse_admins(&adb.sh("dumpsys device_policy"))
             .into_iter()
@@ -82,14 +83,20 @@ pub fn parse_launchable(dump: &str) -> HashSet<String> {
     dump.lines().filter_map(|l| l.trim().split_once('/').map(|(p, _)| p.trim().to_string())).collect()
 }
 
-fn app_origins(adb: &Adb, pkgs: &Packages) -> Vec<String> {
+fn app_origins(adb: &Adb, pkgs: &Packages, listed: &HashSet<String>) -> Vec<String> {
     let launchable =
         parse_launchable(&adb.sh(
             "cmd package query-activities --brief -a android.intent.action.MAIN -c android.intent.category.LAUNCHER",
         ));
+    origin_findings(pkgs, &launchable, listed)
+}
+
+/// Where third-party apps came from. Preinstalls named in the lists (`listed`) are skipped: makers ship them
+/// without an installer, and the removal plan already covers them.
+pub fn origin_findings(pkgs: &Packages, launchable: &HashSet<String>, listed: &HashSet<String>) -> Vec<String> {
     let mut v = Vec::new();
     // An APK install is suspicious even under an OEM-looking name; the other two signals are normal for OEM apps.
-    for p in pkgs.values().filter(|p| !p.system && p.enabled) {
+    for p in pkgs.values().filter(|p| !p.system && p.enabled && !listed.contains(&p.name)) {
         let oem = is_oem(&p.name);
         if APK_INSTALLERS.contains(&p.installer.as_str()) {
             v.push(format!(

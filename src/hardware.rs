@@ -106,15 +106,33 @@ pub fn show_load(phone: &Phone, d: &Diag) {
         let used = d.ram_total_mb - d.ram_free_mb;
         ui::say(&format!("RAM used: {} of {}", ui::format_mb(used), ui::format_mb(d.ram_total_mb)));
     }
-    let top = phone.adb.sh(&format!("top -b -n 1 -m {TOP_PROCESSES} -o %CPU,NAME"));
-    let rows: Vec<&str> =
-        top.lines().skip_while(|l| !l.contains("%CPU")).skip(1).map(str::trim).filter(|l| !l.is_empty()).collect();
-    if !rows.is_empty() {
-        ui::dim("Busiest processes (CPU %, name):");
-        for r in rows.iter().take(TOP_PROCESSES) {
-            ui::dim(&format!("  {r}"));
+    // Two samples a second apart: the first one has no CPU time to compare with yet. One extra row for top itself.
+    let top = phone.adb.sh(&format!("top -b -n 2 -d 1 -m {} -o %CPU,NAME -s 1", TOP_PROCESSES + 1));
+    match busiest(&top) {
+        Some(rows) if rows.is_empty() => ui::dim("Nothing is using the CPU right now."),
+        Some(rows) => {
+            ui::dim("Busiest processes (CPU %, name):");
+            for (cpu, name) in rows.iter().take(TOP_PROCESSES) {
+                ui::dim(&format!("  {cpu:>5.1}  {name}"));
+            }
         }
+        None => {}
     }
+}
+
+/// Processes using CPU in the last sample of `top` output, without top itself. None if there is no table.
+pub fn busiest(top: &str) -> Option<Vec<(f64, String)>> {
+    let lines: Vec<&str> = top.lines().collect();
+    let header = lines.iter().rposition(|l| l.contains("%CPU"))?;
+    let rows = lines[header + 1..]
+        .iter()
+        .filter_map(|l| {
+            let (cpu, name) = l.trim().split_once(char::is_whitespace)?;
+            Some((cpu.parse::<f64>().ok()?, name.trim().to_string()))
+        })
+        .filter(|(cpu, name)| *cpu > 0.0 && name != "top")
+        .collect();
+    Some(rows)
 }
 
 /// Cold-start time of the Settings app in ms (median of a few runs). Opens Settings briefly.

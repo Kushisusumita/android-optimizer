@@ -114,6 +114,11 @@ pub fn candidates(paths: &Paths, info: &DeviceInfo, pkgs: &Packages, overrides: 
     out
 }
 
+/// Installed packages that any list for this phone names (known preinstalls and documented malware).
+pub fn listed_packages(paths: &Paths, info: &DeviceInfo, pkgs: &Packages) -> HashSet<String> {
+    load_specs(paths, info, &[]).iter().flat_map(|spec| pkgs.matching(&spec.pattern)).collect()
+}
+
 /// Apps the person installed since this phone's previous run (from that run's package list).
 pub fn new_since_last_run(paths: &Paths, device_id: &str, pkgs: &Packages) -> Vec<String> {
     let Some(last) =

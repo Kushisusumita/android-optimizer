@@ -107,9 +107,10 @@ pub fn stuck_key(audio_dump: &str, now_ms: i64) -> Option<&'static str> {
 }
 
 /// Battery wear from `dumpsys batterystats`: (percent of design capacity, "learned of design mAh").
+/// A learned value exactly equal to the design one means the phone never measured wear (Samsung) - unknown.
 pub fn capacity_from_stats(stats: &str) -> Option<(i64, String)> {
     let design = num_after(stats, "Estimated battery capacity:").filter(|v| *v > 0)?;
-    let learned = num_after(stats, "Max learned battery capacity:").filter(|v| *v > 0)?;
+    let learned = num_after(stats, "Max learned battery capacity:").filter(|v| *v > 0 && *v != design)?;
     Some(((100 * learned / design).min(100), format!("{learned} of {design} mAh")))
 }
 

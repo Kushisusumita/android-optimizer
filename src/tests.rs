@@ -523,3 +523,58 @@ fn number_picking_and_bars() {
     assert_eq!(ui::bar(0.5), format!("[{}{}]", "#".repeat(12), "-".repeat(12)));
     assert_eq!(ui::format_mb(2048), "2.0 GB");
 }
+
+// ---------------------------------------------------------------- found on a real phone
+
+#[test]
+fn a_phone_that_does_not_measure_wear_reports_no_battery_health() {
+    // Samsung reports every "learned" value equal to the design capacity: nothing was measured.
+    let stats = "  Estimated battery capacity: 5000 mAh\n  Last learned battery capacity: 5000 mAh\n  Min learned battery capacity: 5000 mAh\n  Max learned battery capacity: 5000 mAh\n";
+    assert_eq!(diagnostics::capacity_from_stats(stats), None);
+}
+
+#[test]
+fn busiest_processes_come_from_the_last_sample_without_top_itself() {
+    let top = "Tasks: 600 total\n800%cpu 3%user\n%CPU]NAME\n 5.0 surfaceflinger\n 0.0 init\n\
+               Tasks: 600 total\n800%cpu 2%user\n%CPU]NAME\n10.0 top\n 3.0 com.android.systemui\n 0.0 adbd\n";
+    assert_eq!(hardware::busiest(top), Some(vec![(3.0, "com.android.systemui".to_string())]));
+    assert_eq!(hardware::busiest("%CPU NAME\n10.0 top\n 0.0 init\n"), Some(Vec::new()), "nothing busy");
+    assert_eq!(hardware::busiest("top: unknown option -s"), None, "unreadable output is not 'nothing busy'");
+}
+
+#[test]
+fn preinstalled_apps_from_the_lists_are_not_unknown_sources() {
+    let pkgs = Packages::parse(
+        "package:com.facebook.katana installer=null\npackage:com.unknown.app installer=null\n\
+         package:com.side.app installer=com.google.android.packageinstaller\n",
+        "",
+        "",
+    );
+    let launchable: HashSet<String> =
+        strings(&["com.facebook.katana", "com.unknown.app", "com.side.app"]).into_iter().collect();
+    let listed: HashSet<String> = strings(&["com.facebook.katana"]).into_iter().collect();
+    let found = security::origin_findings(&pkgs, &launchable, &listed).join("\n");
+    assert!(found.contains("com.unknown.app - unknown source"));
+    assert!(found.contains("com.side.app - installed from an APK file"));
+    assert!(!found.contains("com.facebook.katana"));
+}
+
+#[test]
+fn the_phone_title_does_not_repeat_the_model() {
+    let samsung = DeviceInfo::from_props(
+        &props(&[("ro.product.brand", "samsung"), ("ro.product.model", "SM-A127F")]),
+        "x",
+        false,
+    );
+    assert_eq!(samsung.title(), "samsung SM-A127F");
+    let named = DeviceInfo::from_props(
+        &props(&[
+            ("ro.product.brand", "Redmi"),
+            ("ro.product.model", "23124RA7EO"),
+            ("ro.product.marketname", "Redmi Note 13"),
+        ]),
+        "x",
+        false,
+    );
+    assert_eq!(named.title(), "Redmi Note 13 (23124RA7EO)");
+}

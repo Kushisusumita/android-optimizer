@@ -365,7 +365,7 @@ fn detect_root(adb: &Adb) -> Option<Root> {
 }
 
 fn introduce(info: &DeviceInfo) {
-    ui::step(&format!("Phone: {} ({})", info.name, info.model));
+    ui::step(&format!("Phone: {}", info.title()));
     ui::say(&format!("{} - Android {} (API {}), {}", info.brand.title(), info.android, info.sdk, info.rom));
 }
 

@@ -108,6 +108,15 @@ impl DeviceInfo {
         }
     }
 
+    /// "Redmi Note 13 (23124RA7EO)", or just "samsung SM-A127F" when the name already holds the model.
+    pub fn title(&self) -> String {
+        if self.name.contains(&self.model) {
+            self.name.clone()
+        } else {
+            format!("{} ({})", self.name, self.model)
+        }
+    }
+
     /// List file stems to load for debloat: common + google + this brand (malware is loaded separately).
     pub fn list_stems(&self) -> Vec<&'static str> {
         let mut v = vec!["common", "google"];
