@@ -1,12 +1,13 @@
 //! Every question an optimization run asks, in one place. With --yes each one takes its safe default.
 
 use super::Session;
-use crate::config::TextSize;
+use crate::config::{Opts, TextSize};
+use crate::phone::info::DeviceInfo;
 use crate::phone::packages::Packages;
 use crate::removal::candidates::Candidate;
 use crate::removal::lists;
-use crate::tune::settings::test_writable;
-use crate::tune::Plan;
+use crate::tune::settings::Access;
+use crate::tune::{Change, Plan};
 use crate::ui;
 
 /// How many times to re-check after the person says the switch is on.
@@ -40,33 +41,65 @@ pub fn select_removals(s: &Session, shown: &[&Candidate]) -> Vec<(String, String
 }
 
 /// Make sure settings can be changed; on brands that lock them, show the brand's exact switch and wait.
-pub fn settings_access(s: &Session) -> bool {
+pub fn settings_access(s: &Session) -> Option<Access> {
     let adb = &s.phone.adb;
-    if test_writable(adb) {
-        return true;
+    if let Some(access) = Access::check(adb) {
+        return Some(access);
     }
     ui::warn("The phone does not allow changing settings - ad blocking, text size and animations cannot be applied.");
     for line in s.phone.info.brand.setup_help() {
         ui::dim(line);
     }
     if s.opts.yes {
-        return false;
+        return None;
     }
     for _ in 0..ACCESS_RETRIES {
         let a = ui::read_line("Turn it on and press Enter (n = continue without settings)").to_ascii_lowercase();
         if matches!(a.as_str(), "n" | "no") {
-            return false;
+            return None;
         }
-        if test_writable(adb) {
+        if let Some(access) = Access::check(adb) {
             ui::ok("Settings access granted");
-            return true;
+            return Some(access);
         }
         ui::warn("Not yet - check that the switch stayed on");
     }
-    false
+    None
 }
 
-pub fn choose_plan(s: &Session, pkgs: &Packages) -> Plan {
+/// The automatic changes worth offering on this phone: they apply to it, the phone lets us make them, and
+/// the command line did not rule them out.
+pub fn offered_changes(info: &DeviceInfo, opts: &Opts, settings_allowed: bool) -> Vec<Change> {
+    let ruled_out = |c: &Change| match c {
+        Change::AdBlockDns => opts.no_dns,
+        Change::Compile => opts.no_compile,
+        _ => false,
+    };
+    Change::ALL
+        .into_iter()
+        .filter(|c| c.applies_to(info) && (settings_allowed || !c.needs_settings_access()) && !ruled_out(c))
+        .collect()
+}
+
+/// Everything the run will do on its own, as one checklist: Enter keeps all, numbers skip those.
+fn confirm_changes(s: &Session, offered: Vec<Change>) -> Vec<Change> {
+    if s.opts.yes || offered.is_empty() {
+        return offered;
+    }
+    ui::step("The run will also do this (all reversible)");
+    let rows: Vec<(String, String, bool)> =
+        offered.iter().map(|c| (c.title().to_string(), String::new(), true)).collect();
+    ui::show_list(&rows);
+    let answer = ui::read_line("Enter - do all of it; numbers (e.g. 1,6) - skip those");
+    ui::split_by_numbers(&offered, &ui::parse_numbers(&answer, offered.len())).1
+}
+
+/// The person's choices for this run. Without settings access only cleanup and compilation remain.
+pub fn choose_plan(s: &Session, pkgs: &Packages, access: Option<&Access>) -> Plan {
+    let changes = confirm_changes(s, offered_changes(&s.phone.info, &s.opts, access.is_some()));
+    if access.is_none() {
+        return Plan { changes, ..Plan::default() };
+    }
     let (font, display) = text_scales(s);
     let background_question = "Limit background activity (saves battery and RAM) for which apps?";
     Plan {
@@ -74,6 +107,7 @@ pub fn choose_plan(s: &Session, pkgs: &Packages) -> Plan {
         display,
         background: choose_apps(s, pkgs, &s.opts.background, background_question),
         mute: choose_apps(s, pkgs, &s.opts.mute, "Turn off notifications for which apps?"),
+        changes,
     }
 }
 

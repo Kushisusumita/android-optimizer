@@ -35,7 +35,8 @@ download Google's official version.
 
 ## What it does
 
-Runs **automatically** (safe for everyone):
+Safe for everyone — shown first as **one checklist**, all on by default; press Enter to do all of it or type
+numbers to skip some (`--yes` takes them all without asking):
 
 - Removes preinstalled ads, junk and telemetry from per-brand lists in [`lists/`](lists) — e.g. Xiaomi MSA
   ads and analytics, Facebook/Netflix/game preinstalls, silent installers. Apps **you** installed from a
@@ -54,8 +55,9 @@ Shows you **how the phone is doing**, before and after:
 - A real speed measurement: how long a standard app takes to open from cold.
 - Progress through each stage (`[2/5] … 40% done`), the score so far, and a **before/after chart** at the end.
 
-Only **asks** about personal choices: which apps to keep, which heavy apps to limit in the background,
-which apps to silence, and the text/display size.
+**Asks** about personal choices, never deciding for you: which apps to keep, which heavy apps to limit in
+the background, which apps to silence, and whether to make text bigger (for poor eyesight; unchanged unless
+you pick a size). All questions come before the run, so after them it needs nobody at the keyboard.
 
 ## Actions
 

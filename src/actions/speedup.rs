@@ -11,7 +11,7 @@ pub fn run(s: &Session, before: &Snapshot) {
     progress.next("Cleaning caches");
     cleanup::clean_caches(&s.phone.adb);
     progress.next("Compiling apps");
-    steps::compile_unless_skipped(s, &before.diag);
+    steps::compile(s, &before.diag, s.opts.no_compile.then_some("--no-compile"));
     progress.next("Measuring the result");
     steps::finish(s, before, launch);
 }

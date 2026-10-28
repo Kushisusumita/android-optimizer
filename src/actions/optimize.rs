@@ -7,8 +7,8 @@ use crate::host::report;
 use crate::inspect::score;
 use crate::removal::candidates::Candidate;
 use crate::removal::lists::Section;
-use crate::tune::settings::Tweaks;
-use crate::tune::{self, adblock, apps, cleanup, Plan};
+use crate::tune::settings::{Access, Tweaks};
+use crate::tune::{self, adblock, apps, cleanup, Change, Plan};
 use crate::ui::{self, chart::Progress};
 
 pub fn run(action: Action, s: &Session, before: &Snapshot) {
@@ -22,7 +22,8 @@ pub fn run(action: Action, s: &Session, before: &Snapshot) {
     }
     // Every question first; after this the run needs nobody at the keyboard.
     let chosen = questions::select_removals(s, &shown);
-    let plan = questions::settings_access(s).then(|| questions::choose_plan(s, &before.pkgs));
+    let access = questions::settings_access(s);
+    let plan = questions::choose_plan(s, &before.pkgs, access.as_ref());
     let launch = steps::measure_speed(s);
 
     let mut progress = Progress::new(5);
@@ -30,14 +31,18 @@ pub fn run(action: Action, s: &Session, before: &Snapshot) {
     let removed = apps::remove_packages(&s.phone.adb, &s.report, &chosen);
     show_interim(before, removed);
     progress.next("Settings, ad blocking and limits");
-    match &plan {
-        Some(plan) => apply_settings(s, plan),
+    match &access {
+        Some(access) => apply_settings(s, &plan, access),
         None => ui::dim("Skipped: the phone does not allow changing settings"),
     }
     progress.next("Cleaning caches");
-    cleanup::clean_caches(&s.phone.adb);
+    if plan.wants(Change::CleanCaches) {
+        cleanup::clean_caches(&s.phone.adb);
+    } else {
+        ui::dim("Skipped (not chosen)");
+    }
     progress.next("Compiling apps");
-    steps::compile_unless_skipped(s, &before.diag);
+    steps::compile(s, &before.diag, (!plan.wants(Change::Compile)).then_some("not chosen"));
     progress.next("Measuring the result");
     steps::finish(s, before, launch);
 }
@@ -70,10 +75,10 @@ fn show_interim(before: &Snapshot, removed: usize) {
     ui::say(&format!("Health score so far: {was} -> {now}"));
 }
 
-fn apply_settings(s: &Session, plan: &Plan) {
-    let mut tw = Tweaks::new(&s.phone.adb, &s.report);
+fn apply_settings(s: &Session, plan: &Plan, access: &Access) {
+    let mut tw = Tweaks::new(&s.phone.adb, &s.report, access);
     tune::apply(&mut tw, &s.phone.info, plan, &s.paths);
-    if !s.opts.no_dns {
+    if plan.wants(Change::AdBlockDns) {
         adblock::enable(&mut tw, &s.phone.info, s.opts.dns_host.as_deref().unwrap_or(config::DEFAULT_DNS_HOST));
     }
     if tw.secure_denied {

@@ -1,11 +1,10 @@
 //! Reversible `settings put` / `wm density` changes: each original value is recorded once for Restore.
 
-use super::Plan;
+use super::{Change, Plan};
 use crate::config;
 use crate::host::report::Report;
 use crate::phone::adb::Adb;
-use crate::phone::brands::Brand;
-use crate::phone::info::{parse_wm_size, DeviceInfo};
+use crate::phone::info::parse_wm_size;
 use crate::ui;
 use crate::util::num_after;
 use std::collections::HashSet;
@@ -26,6 +25,16 @@ pub fn density_target(physical_dpi: i64, scale: f64, smallest_side_px: i64) -> i
     wanted.min(max)
 }
 
+/// Proof that this phone accepts settings changes. Only `check` can make one, so nothing can try to change
+/// settings on a phone that locks them.
+pub struct Access(());
+
+impl Access {
+    pub fn check(adb: &Adb) -> Option<Access> {
+        test_writable(adb).then_some(Access(()))
+    }
+}
+
 /// Reversible changes to one phone during one run.
 pub struct Tweaks<'a> {
     pub(super) adb: &'a Adb,
@@ -36,7 +45,7 @@ pub struct Tweaks<'a> {
 }
 
 impl<'a> Tweaks<'a> {
-    pub fn new(adb: &'a Adb, report: &'a Report) -> Self {
+    pub fn new(adb: &'a Adb, report: &'a Report, _access: &Access) -> Self {
         Tweaks { adb, report, saved: HashSet::new(), secure_denied: false }
     }
 
@@ -85,7 +94,7 @@ impl<'a> Tweaks<'a> {
 }
 
 /// Can we change settings at all? (Xiaomi blocks this without "USB debugging (Security settings)".)
-pub fn test_writable(adb: &Adb) -> bool {
+fn test_writable(adb: &Adb) -> bool {
     if refused(&adb.sh("settings put global clearphone_probe 1")) {
         return false;
     }
@@ -105,21 +114,25 @@ pub fn restore_setting(adb: &Adb, ns: &str, key: &str, value: &str) {
     let _ = adb.sh(&cmd);
 }
 
-pub(super) fn apply_speed_settings(tw: &mut Tweaks, info: &DeviceInfo) {
-    let anim = ["window_animation_scale", "transition_animation_scale", "animator_duration_scale"]
-        .iter()
-        .filter(|k| tw.set("global", k, config::ANIMATION_SCALE))
-        .count();
-    if anim == 3 {
+const ANIMATION_KEYS: [&str; 3] = ["window_animation_scale", "transition_animation_scale", "animator_duration_scale"];
+
+pub(super) fn apply_speed_settings(tw: &mut Tweaks, plan: &Plan) {
+    if plan.wants(Change::Animations)
+        && ANIMATION_KEYS.iter().filter(|k| tw.set("global", k, config::ANIMATION_SCALE)).count()
+            == ANIMATION_KEYS.len()
+    {
         ui::ok("Animations 2x faster - the interface feels snappier");
     }
-    if tw.set("global", "wifi_scan_always_enabled", "0") && tw.set("global", "ble_scan_always_enabled", "0") {
+    if plan.wants(Change::Scanning)
+        && tw.set("global", "wifi_scan_always_enabled", "0")
+        && tw.set("global", "ble_scan_always_enabled", "0")
+    {
         ui::ok("Constant background Wi-Fi/Bluetooth scanning off - saves battery (location still works)");
     }
-    if tw.set("global", "mobile_data_always_on", "0") {
+    if plan.wants(Change::MobileData) && tw.set("global", "mobile_data_always_on", "0") {
         ui::ok("Mobile data is not kept on while on Wi-Fi - saves battery");
     }
-    if info.brand == Brand::Xiaomi && tw.set("global", "com.miui.home.setting_recommend_app", "0") {
+    if plan.wants(Change::XiaomiRecommendations) && tw.set("global", "com.miui.home.setting_recommend_app", "0") {
         ui::ok("Xiaomi home screen app recommendations off");
     }
 }

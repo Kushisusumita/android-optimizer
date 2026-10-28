@@ -17,11 +17,11 @@ pub fn measure_speed(s: &Session) -> Option<i64> {
     ms
 }
 
-pub fn compile_unless_skipped(s: &Session, diag: &Diag) {
-    if s.opts.no_compile {
-        ui::dim("Skipped (--no-compile)");
-    } else {
-        cleanup::optimize_apps(&s.phone.adb, &s.phone.info, diag);
+/// Compile apps unless there is a reason to skip it, then stop leftover background processes.
+pub fn compile(s: &Session, diag: &Diag, skip_reason: Option<&str>) {
+    match skip_reason {
+        Some(reason) => ui::dim(&format!("Skipped ({reason})")),
+        None => cleanup::optimize_apps(&s.phone.adb, &s.phone.info, diag),
     }
     cleanup::stop_background(&s.phone.adb);
 }

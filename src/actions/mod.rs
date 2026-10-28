@@ -7,6 +7,8 @@ mod restore;
 mod snapshot;
 mod speedup;
 mod steps;
+#[cfg(test)]
+mod tests;
 
 use crate::config::{Action, Opts};
 use crate::host::paths::Paths;
