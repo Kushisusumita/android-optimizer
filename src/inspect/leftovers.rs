@@ -1,6 +1,7 @@
 //! Settings that "optimizer" apps and online tips leave behind and that make a phone lag, restart apps
 //! or drain the battery. Only values someone changed away from Android's default count; an unset value
-//! ("null") is the default and is left alone. Keys are from AOSP `Settings.java`.
+//! ("null") is the default and is left alone. Keys are from AOSP `Settings.java`. Personal choices that do
+//! not slow the phone down (keeping the screen on while charging, say) are not listed: they are the owner's.
 
 use crate::phone::adb::Adb;
 
@@ -21,13 +22,6 @@ const KNOWN: &[Leftover] = &[
         healthy: "0",
         what: "\"Don't keep activities\" was on - every app restarted when you came back to it",
         is_bad: |v| v == "1",
-    },
-    Leftover {
-        ns: "global",
-        key: "stay_on_while_plugged_in",
-        healthy: "0",
-        what: "the screen never turned off while charging",
-        is_bad: |v| v.parse::<i32>().is_ok_and(|n| n != 0),
     },
     Leftover {
         ns: "global",

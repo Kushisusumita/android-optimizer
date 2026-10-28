@@ -194,13 +194,17 @@ fn finds_only_settings_changed_away_from_healthy() {
         }
     };
     let keys: Vec<&str> = leftovers::found(phone).iter().map(|l| l.key).collect();
-    assert_eq!(keys, vec!["always_finish_activities", "stay_on_while_plugged_in", "cached_apps_freezer"]);
+    assert_eq!(
+        keys,
+        vec!["always_finish_activities", "cached_apps_freezer"],
+        "keeping the screen on while charging is a personal choice"
+    );
 }
 
 #[test]
 fn a_phone_with_default_settings_needs_no_repair() {
     assert!(leftovers::found(|_, _| "null".to_string()).is_empty());
-    assert!(leftovers::found(|_, key| if key == "always_finish_activities" { "0".into() } else { "1".into() })
-        .iter()
-        .all(|l| l.key == "stay_on_while_plugged_in"));
+    assert!(
+        leftovers::found(|_, key| if key == "always_finish_activities" { "0".into() } else { "1".into() }).is_empty()
+    );
 }
