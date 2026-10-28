@@ -14,8 +14,9 @@ pub fn strings(v: &[&str]) -> Vec<String> {
     v.iter().map(|s| s.to_string()).collect()
 }
 
+/// One fixed folder per test, emptied at the start of each run, so runs do not pile up folders.
 pub fn temp_root(name: &str) -> PathBuf {
-    let dir = std::env::temp_dir().join(format!("android-optimizer-test-{}-{name}", std::process::id()));
+    let dir = std::env::temp_dir().join("android-optimizer-tests").join(name);
     let _ = fs::remove_dir_all(&dir);
     fs::create_dir_all(&dir).unwrap();
     dir
