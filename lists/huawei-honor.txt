@@ -1,0 +1,26 @@
+# Huawei / Honor (EMUI, MagicOS)
+# Format and sections - see common.txt
+# AppGallery and the Huawei account are protected (on Huawei phones without Google it is the only store).
+
+[safe]
+com.huawei.android.tips             # Tips
+com.huawei.hwsearch                 # Petal Search - ads
+com.huawei.himovie.overseas         # Huawei Video
+com.huawei.hiskytone                # Skytone - roaming SIM
+com.huawei.hifolder                 # "Recommended" folder - app ads
+com.huawei.fastapp                  # Quick apps
+com.huawei.magazine                 # Lock screen magazine - ads
+com.huawei.browser                  # Huawei browser - ads and news @needs com.android.chrome
+com.hihonor.android.tips            # Tips (Honor)
+com.hihonor.magazine                # Lock screen magazine (Honor)
+com.hihonor.browser                 # Honor browser - ads @needs com.android.chrome
+
+[max]
+com.huawei.gameassistant            # Game assistant
+com.hihonor.gameassistant           # Game assistant (Honor)
+com.huawei.intelligent              # Smart assistant (left screen feed)
+com.huawei.search                   # Swipe-down search
+com.huawei.phoneservice             # Support
+com.hihonor.phoneservice            # Support (Honor)
+com.huawei.music                    # Music
+com.huawei.parentcontrol            # Parental control

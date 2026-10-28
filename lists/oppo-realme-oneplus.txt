@@ -1,0 +1,27 @@
+# Oppo / Realme / OnePlus (ColorOS, Realme UI, OxygenOS)
+# Format and sections - see common.txt
+
+[safe]
+com.opos.ads                        # ColorOS ad service
+com.heytap.pictorial                # Lock screen magazine - ads and data usage
+com.nearme.instant.platform         # Instant apps - ads
+com.nearme.statistics.rom           # Telemetry
+com.oplus.statistics.rom            # Telemetry
+com.heytap.yoli                     # Yoli - videos with ads
+com.coloros.yoli                    # Yoli - videos with ads
+com.oppo.operationManual            # User manual
+com.coloros.operationManual         # User manual
+com.heytap.browser                  # HeyTap browser - ads @needs com.android.chrome
+com.coloros.browser                 # ColorOS browser - ads @needs com.android.chrome
+com.nearme.browser                  # Oppo browser - ads @needs com.android.chrome
+
+[max]
+com.heytap.market                   # App Market - ads and pushed installs
+com.oppo.market                     # App Market - ads and pushed installs
+com.heytap.music                    # Music
+com.oplus.games                     # Game space
+com.coloros.gamespace               # Game space
+com.coloros.assistantscreen         # Smart assistant (left screen feed)
+com.coloros.childrenspace           # Kids space
+com.heytap.mcs                      # HeyTap push (promotions)
+com.coloros.smartdrive              # Driving mode

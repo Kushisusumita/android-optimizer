@@ -1,0 +1,146 @@
+# NEVER removed - protection against bricking, boot loops and data loss.
+# Even if a package appears in another list, via * or -Include, it is skipped.
+# Wildcards (*) are supported.
+
+# --- Android core ---
+android
+com.android.systemui
+com.android.settings
+com.android.phone
+com.android.server.telecom
+com.android.shell
+com.android.providers.*
+com.android.permissioncontroller
+com.google.android.permissioncontroller
+com.android.ext.services
+com.google.android.ext.services
+com.android.packageinstaller
+com.google.android.packageinstaller
+com.android.bluetooth
+com.android.nfc
+com.android.se
+com.android.stk
+com.android.keychain
+com.android.location.fused
+com.android.carrierconfig
+com.android.emergency
+com.android.cellbroadcastreceiver*
+com.google.android.cellbroadcast*
+com.android.networkstack*
+com.google.android.networkstack*
+com.android.wifi.*
+com.android.documentsui
+com.google.android.documentsui
+com.android.provision
+com.google.android.setupwizard
+com.android.updater
+com.android.webview
+com.google.android.webview
+com.google.android.trichromelibrary
+com.android.chrome
+com.qualcomm.*
+com.qti.*
+com.mediatek.*
+vendor.*
+
+# --- Google Play and services ---
+com.android.vending
+com.google.android.gms
+com.google.android.gms.*
+com.google.android.gsf
+com.google.android.apps.photos
+com.google.android.apps.turbo
+com.google.android.apps.restore
+
+# --- Calls, SMS, contacts, camera ---
+com.android.contacts
+com.google.android.contacts
+com.android.dialer
+com.google.android.dialer
+com.android.mms
+com.google.android.apps.messaging
+com.android.camera
+com.android.camera2
+
+# --- Keyboards ---
+com.android.inputmethod.*
+com.google.android.inputmethod.*
+com.samsung.android.honeyboard
+com.touchtype.swiftkey
+com.sohu.inputmethod.sogou.xiaomi
+com.baidu.input_mi
+
+# --- Home screens ---
+com.android.launcher3
+com.google.android.apps.nexuslauncher
+com.miui.home
+com.mi.android.globallauncher
+com.sec.android.app.launcher
+com.huawei.android.launcher
+com.hihonor.android.launcher
+com.oppo.launcher
+net.oneplus.launcher
+com.bbk.launcher2
+com.transsion.hilauncher
+com.transsion.XOSLauncher
+com.motorola.launcher3
+
+# --- Xiaomi: removing these breaks the system ---
+com.miui.securitycenter             # Security: permissions, battery, install checks (removal can boot-loop)
+com.miui.securitycore
+com.miui.securityadd
+com.lbe.security.miui
+com.miui.packageinstaller
+com.miui.core
+com.miui.system
+com.miui.rom
+com.miui.powerkeeper
+com.miui.guardprovider
+com.miui.gallery
+com.miui.cloudservice
+com.xiaomi.xmsf
+com.xiaomi.finddevice
+com.xiaomi.account
+com.xiaomi.scanner
+com.xiaomi.simactivate.service      # SIM verification (needed for "USB debugging (Security settings)")
+com.xiaomi.mtb                      # modem
+com.miui.audiomonitor               # call and media audio
+com.android.thememanager            # Themes: wallpapers and the lock screen break without it
+com.miui.fmservice                  # FM tuner service (the FM radio app itself may be removed)
+
+# --- Samsung ---
+com.samsung.android.dialer
+com.samsung.android.messaging
+com.samsung.android.incallui
+com.samsung.android.mobileservice
+com.samsung.android.lool
+com.samsung.android.sm.*
+com.samsung.android.providers.*
+com.samsung.android.knox.*
+com.samsung.knox.*
+com.sec.enterprise.*
+com.osp.app.signin
+
+# --- Huawei / Honor ---
+com.huawei.systemmanager
+com.huawei.hwid
+com.huawei.appmarket
+com.hihonor.id
+
+# --- Oppo / Realme / OnePlus / vivo / Transsion ---
+com.coloros.safecenter
+com.coloros.phonemanager
+com.oplus.battery
+com.heytap.usercenter
+com.vivo.permissionmanager
+com.iqoo.secure
+com.transsion.ossettingsext
+com.transsion.phonemaster
+
+# --- Regional essentials (government services, payments, app stores) ---
+ru.nspk.mirpay
+ru.vk.store
+ru.rostel
+ru.gosuslugi.*
+kz.mobile.mgov
+kz.kaspi.mobile

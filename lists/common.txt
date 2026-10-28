@@ -1,0 +1,57 @@
+# Any Android: partner preinstalls, silent app installers, ads.
+#
+# Line format:  package  # description  [@needs replacement.package] [@partner]
+#   @needs X   - remove only if X is installed and enabled (e.g. a browser only if Chrome is there)
+#   @partner   - remove only if preinstalled, not installed by the person (Play, RuStore, Galaxy Store...)
+#   *          - wildcard: com.facebook.* = every Facebook package
+# Sections:
+#   [safe] - removed by Optimize
+#   [max]  - removed by Maximum (Optimize offers them as optional)
+
+[safe]
+com.facebook.appmanager            # Facebook App Manager - background Facebook updates
+com.facebook.services              # Facebook Services - background service
+com.facebook.system                # Facebook App Installer - silent app installs
+com.facebook.katana                # Facebook (preinstalled) @partner
+com.facebook.orca                  # Messenger (preinstalled) @partner
+com.ironsource.appcloud.*          # AppCloud - pushes app installs and ads
+com.aura.oobe.*                    # Aura - pushes app installs
+com.digitalturbine.*               # Digital Turbine Ignite - silent app installs
+com.dti.*                          # Digital Turbine - silent app installs
+com.LogiaGroup.LogiaDeck           # Logia Deck - ad feed
+com.mobeam.barcodeService          # Mobeam - barcode ad service
+com.opera.preinstall               # Opera - preinstall service
+com.debug.loggerui                 # MTK Logger - MediaTek debug log (for engineers)
+com.netflix.partner.activation     # Netflix - preinstall activation service
+com.netflix.mediaclient            # Netflix (preinstalled) @partner
+com.amazon.appmanager              # Amazon App Manager - silent app installs
+com.amazon.mShop.android.shopping  # Amazon Shopping (preinstalled) @partner
+com.booking                        # Booking.com (preinstalled) @partner
+com.agoda.mobile.consumer          # Agoda (preinstalled) @partner
+com.trivago                        # Trivago (preinstalled) @partner
+com.linkedin.android               # LinkedIn (preinstalled) @partner
+com.ebay.mobile                    # eBay (preinstalled) @partner
+com.ebay.carrier                   # eBay - preinstall service
+com.king.*                         # Candy Crush and other King games (preinstalled) @partner
+com.gameloft.*                     # Gameloft games (preinstalled) @partner
+com.puzzlegames.puzzlebrickslegend # Puzzle Bricks Legend game (preinstalled, ad-supported) @partner
+com.vitastudio.mahjong             # Mahjong game (preinstalled, ad-supported) @partner
+com.block.juggle                   # Block Blast game (preinstalled, ad-supported) @partner
+
+[max]
+com.android.browser                # Manufacturer's stock browser (often with ads) @needs com.android.chrome
+com.spotify.music                  # Spotify (preinstalled) @partner
+com.zhiliaoapp.musically           # TikTok (preinstalled) @partner
+com.ss.android.ugc.trill           # TikTok (preinstalled) @partner
+com.alibaba.aliexpresshd           # AliExpress (preinstalled) @partner
+com.einnovation.temu               # Temu (preinstalled) @partner
+cn.wps.moffice_eng                 # WPS Office (preinstalled, ad-supported) @partner
+com.microsoft.skydrive             # OneDrive (preinstalled) @partner
+com.microsoft.office.officehubrow  # Microsoft 365 / Office (preinstalled) @partner
+com.microsoft.appmanager           # Link to Windows
+ru.ivi.client                      # ivi - streaming (preinstalled) @partner
+ru.mail.mailapp                    # Mail.ru Mail (preinstalled) @partner
+ru.mail.cloud                      # Mail.ru Cloud (preinstalled) @partner
+ru.rt.video.app.mobile             # Wink - streaming (preinstalled) @partner
+ru.kinopoisk                       # Kinopoisk (preinstalled) @partner
+ru.litres.android                  # Litres (preinstalled) @partner

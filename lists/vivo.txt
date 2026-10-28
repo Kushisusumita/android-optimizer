@@ -1,0 +1,18 @@
+# vivo / iQOO (Funtouch OS, OriginOS)
+# Format and sections - see common.txt
+
+[safe]
+com.vivo.browser                    # vivo browser - ads @needs com.android.chrome
+com.vivo.website                    # vivo website
+com.vivo.magazine                   # Lock screen magazine - ads
+com.bbk.iqoo.feedback               # Feedback
+com.vivo.vivokaraoke                # Karaoke
+com.vivo.wallet                     # vivo wallet (China)
+
+[max]
+com.vivo.hiboard                    # Jovi Home - left screen feed
+com.vivo.assistant                  # Jovi assistant
+com.vivo.appstore                   # V-Appstore - ads and pushed installs
+com.vivo.game                       # Game center
+com.vivo.gamecube                   # Game center
+com.vivo.childrenmode               # Kids mode

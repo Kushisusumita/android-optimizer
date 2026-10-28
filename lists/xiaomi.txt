@@ -1,0 +1,53 @@
+# Xiaomi / Redmi / POCO (MIUI, HyperOS)
+# Format and sections - see common.txt
+
+[safe]
+com.miui.msa.global                 # MSA - system ad service (the main source of ads on MIUI/HyperOS)
+com.miui.systemAdSolution           # Ad module (China firmware)
+com.xiaomi.ab                       # Ad module
+com.miui.analytics                  # Xiaomi analytics and telemetry
+com.miui.analytics.go               # Xiaomi analytics and telemetry
+com.miui.daemon                     # Diagnostics collection (MQS) - always runs in the background
+com.miui.misightservice             # MiSight - system event collection for Xiaomi (telemetry)
+com.xiaomi.security.onetrack        # OneTrack - Xiaomi usage analytics/telemetry
+com.xiaomi.aiservice                # Xiaomi AI engine with the OneTrack SDK (collects device IDs and usage)
+com.miui.cotaservice                # COTA config service - sends and receives data in the background
+com.miui.bugreport                  # Bug report uploader
+com.miui.miservice                  # Services & feedback
+com.xiaomi.mipicks                  # GetApps - app store with ads, pushes apps
+com.xiaomi.discover                 # System app updater (shows ads)
+com.miui.hybrid                     # Quick apps - background ads
+com.miui.hybrid.accessory           # Quick apps - add-on
+com.miui.yellowpage                 # Yellow pages
+com.mi.globalminusscreen            # App vault (left screen feed) with ads
+com.mi.android.globalpersonalassistant # Old App vault with ads
+com.miui.android.fashiongallery     # Wallpaper carousel - ads and data usage
+com.mfashiongallery.emag            # Wallpaper carousel (China firmware)
+com.xiaomi.glgm                     # Xiaomi games
+com.xiaomi.gamecenter               # Game center (China firmware)
+com.xiaomi.gamecenter.sdk.service   # Xiaomi game SDK
+com.xiaomi.midrop                   # ShareMe - ads
+com.miui.contentextension           # Taplus - text suggestions popup
+com.miui.virtualsim                 # Mi Mobile - virtual SIM
+com.xiaomi.mirecycle                # Mi Recycle
+com.miui.newhome                    # News feed (China firmware)
+com.xiaomi.payment                  # Mi Pay (China)
+com.mipay.wallet.in                 # Mi Pay (India)
+com.mipay.wallet.id                 # Mi Pay (Indonesia)
+com.mi.globalbrowser                # Mi Browser - lots of ads @needs com.android.chrome
+com.mi.global.shop                  # Xiaomi Store - shop with ads and promos
+com.mi.global.bbs                   # Xiaomi Community (forum)
+
+[max]
+com.miui.videoplayer                # Mi Video - ads (videos open in Gallery or Google Photos)
+com.miui.player                     # Mi Music - ads
+com.miui.cleanmaster                # Cleaner - ads (the Cleaner button in Security stops working)
+com.miui.cleaner                    # Cleaner (HyperOS) - ads
+com.miui.weather2                   # Weather - the weather widget disappears
+com.miui.personalassistant          # Widget feed (MIUI 13+ / HyperOS); the widget picker may disappear
+com.duokan.phone.remotecontroller   # Mi Remote (IR remote for TVs)
+cn.wps.xiaomi.abroad.lite           # Mi Doc Viewer (WPS)
+com.miui.voiceassist                # Xiao AI voice assistant (China firmware)
+com.miui.compass                    # Compass
+com.xiaomi.smarthome                # Mi Home - Xiaomi smart devices
+com.miui.fm                         # FM radio (needs wired headphones)

@@ -1,0 +1,27 @@
+# Google: discontinued and rarely needed apps. Everything can be reinstalled from Play Store.
+# The essentials (Play, Google Play services, Photos, Gmail, Maps, YouTube, Chrome) are not touched.
+
+[safe]
+com.google.android.music                    # Google Play Music - service closed, does not work
+com.google.android.apps.podcasts            # Google Podcasts - service closed
+com.google.android.videos                   # Google TV / Play Movies
+com.google.android.apps.magazines           # Google News
+com.google.android.apps.books               # Google Play Books
+com.google.android.feedback                 # Google Feedback - sends feedback to Google
+
+[max]
+com.google.android.apps.youtube.music       # YouTube Music
+com.google.android.apps.tachyon             # Google Meet (video calls)
+com.google.android.apps.wellbeing           # Digital Wellbeing - always runs in the background
+com.google.android.projection.gearhead      # Android Auto
+com.google.android.apps.subscriptions.red   # Google One
+com.google.android.keep                     # Google Keep notes
+com.google.android.apps.fitness             # Google Fit
+com.google.android.apps.walletnfcrel        # Google Wallet - tap to pay (if not used)
+com.google.android.apps.chromecast.app      # Google Home - only for Google smart home devices
+com.google.android.apps.googleassistant     # Google Assistant
+com.google.android.apps.bard                # Gemini
+com.google.android.apps.youtube.kids        # YouTube Kids
+com.google.android.apps.docs.editors.docs   # Google Docs
+com.google.android.apps.docs.editors.sheets # Google Sheets
+com.google.android.apps.docs.editors.slides # Google Slides

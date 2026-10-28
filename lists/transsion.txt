@@ -1,0 +1,23 @@
+# Tecno / Infinix / itel (HiOS, XOS) - among the most ad-heavy firmwares
+# Format and sections - see common.txt
+
+[safe]
+com.transsion.phoenix               # Phoenix Browser - ads @needs com.android.chrome
+com.talpa.hibrowser                 # Hi Browser - ads @needs com.android.chrome
+net.bat.store                       # AHA Games - games with ads
+com.transsnet.store                 # Palm Store - ads and pushed installs
+com.afmobi.boomplayer               # Boomplay - music with ads
+com.transsion.statisticalsales      # Sales telemetry
+com.transsion.carlcare              # Carlcare - service center
+com.transsion.magazineservice       # Lock screen magazine - ads
+com.transsion.scanningrecharger     # Top-up by scanning a card
+com.transsion.tecnospot             # Tecno community
+com.idea.questionnaire              # Surveys
+
+[max]
+com.transsion.aivoiceassistant      # Voice assistant
+com.transsion.childmode             # Kids mode
+com.transsion.healthlife            # Health
+com.transsion.smartpanel            # Smart panel
+com.zaz.translate                   # Hi Translate
+com.transsion.plat.appupdate        # System app updater (ads)

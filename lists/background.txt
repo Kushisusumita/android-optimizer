@@ -1,0 +1,16 @@
+# Apps whose background activity is limited by Maximum (Optimize asks first).
+# They work as usual when opened, but do not drain battery and RAM in the background; their notifications may be delayed.
+# Do NOT add messengers, banking, taxi, alarms or navigation here - their notifications would stop.
+# Format - as in common.txt (no sections needed).
+# @media - plays music in the background: on Xiaomi it keeps the smart "Battery saver" mode, not the hard limit.
+
+com.zhiliaoapp.musically                 # TikTok
+com.ss.android.ugc.trill                 # TikTok
+com.spotify.music                        # Spotify @media
+com.einnovation.temu                     # Temu
+com.alibaba.aliexpresshd                 # AliExpress
+com.zzkko                                # Shein
+com.netflix.mediaclient                  # Netflix
+com.google.android.apps.chromecast.app   # Google Home
+com.google.android.apps.youtube.music    # YouTube Music @media
+com.king.candycrushsaga                  # Candy Crush

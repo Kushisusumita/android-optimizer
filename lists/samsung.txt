@@ -1,0 +1,37 @@
+# Samsung (One UI)
+# Format and sections - see common.txt
+
+[safe]
+com.samsung.android.app.spage           # Samsung Free / Bixby Home - feed with ads
+com.samsung.android.bixby.agent         # Bixby voice assistant - runs in the background
+com.samsung.android.bixby.agent.dummy   # Bixby stub
+com.samsung.android.bixby.wakeup        # Bixby "Hi, Bixby" listener
+com.samsung.android.app.tips            # Tips
+com.samsung.android.ardrawing           # AR Doodle
+com.samsung.android.kidsinstaller       # Samsung Kids installer
+com.samsung.android.app.watchmanagerstub # Galaxy Wearable stub
+com.samsung.android.mateagent           # Galaxy Friends
+com.samsung.android.dqagent             # Connection quality data collection (telemetry)
+com.samsung.android.ipsgeofence         # Visit In - location-based ads
+com.samsung.android.tvplus              # Samsung TV Plus
+com.samsung.sree                        # Samsung Global Goals - ads
+
+[max]
+com.samsung.android.rubin.app           # Customization Service - data collection for personalization
+com.samsung.android.voc                 # Samsung Members - news and surveys
+com.samsung.android.game.gamehome       # Game Launcher
+com.samsung.android.game.gametools      # Game Tools
+com.samsung.android.game.gos            # Game Optimizing Service - limits performance in games (may run hotter)
+com.samsung.android.arzone              # AR Zone
+com.samsung.android.aremoji             # AR Emoji
+com.samsung.android.bixbyvision.framework # Bixby Vision (camera recognition)
+com.samsung.android.visionintelligence  # Bixby Vision
+com.samsung.android.svoiceime           # Samsung voice input
+com.samsung.android.oneconnect          # SmartThings
+com.samsung.android.spay                # Samsung Pay / Wallet
+com.samsung.android.spayfw              # Samsung Pay service
+com.samsung.android.samsungpay.gear     # Samsung Pay for watches
+com.samsung.android.livestickers        # Live stickers
+com.samsung.android.stickercenter       # Sticker center
+com.samsung.android.service.peoplestripe # People edge panel
+com.samsung.android.mdx                 # Link to Windows service

@@ -1,0 +1,11 @@
+# Motorola / Lenovo
+# Format and sections - see common.txt
+
+[safe]
+com.motorola.demo                   # Store demo mode
+com.motorola.ccc.notification       # Motorola promo notifications
+
+[max]
+com.motorola.genie                  # Moto Help
+com.motorola.help                   # Help
+com.motorola.gamemode               # Game mode
