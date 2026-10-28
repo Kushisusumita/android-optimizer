@@ -28,5 +28,7 @@ mod util;
 mod test_support;
 
 fn main() {
-    std::process::exit(cli::run());
+    let code = cli::run();
+    ui::keep_window_open_if_needed();
+    std::process::exit(code);
 }

@@ -1,6 +1,7 @@
 //! All terminal output and questions in one place, so the rest of the code never prints directly.
 
 pub mod chart;
+mod console;
 mod prompt;
 mod style;
 #[cfg(test)]
@@ -46,6 +47,15 @@ pub fn say(text: &str) {
 /// A secondary line: indented further and greyed.
 pub fn dim(text: &str) {
     println!("     {}", paint(text, Tone::Muted));
+}
+
+/// When the window was opened only for this program, Windows closes it as soon as the program ends -
+/// wait for Enter first, so the last messages (an error, the results, --help) can be read.
+pub fn keep_window_open_if_needed() {
+    if console::opened_only_for_us() {
+        println!();
+        let _ = read_line("Press Enter to close this window");
+    }
 }
 
 /// Human-readable size from a megabyte count.
