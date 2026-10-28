@@ -40,3 +40,13 @@ fn only_user_added_battery_allowlist_entries_can_be_removed() {
     assert!(!apps::in_user_allowlist(list, "com.google.android.gms"), "system entries stay");
     assert!(!apps::in_user_allowlist(list, "com.example"), "whole names only");
 }
+
+#[test]
+fn animations_change_only_from_the_default_never_from_the_owners_choice() {
+    assert!(settings::animation_is_default("null"));
+    assert!(settings::animation_is_default("1"));
+    assert!(settings::animation_is_default("1.0"));
+    assert!(!settings::animation_is_default("0.0"), "the owner turned animations off - leave it");
+    assert!(!settings::animation_is_default("0.5"));
+    assert!(!settings::animation_is_default("1.5"));
+}

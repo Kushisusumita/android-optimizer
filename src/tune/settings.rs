@@ -116,12 +116,25 @@ pub fn restore_setting(adb: &Adb, ns: &str, key: &str, value: &str) {
 
 const ANIMATION_KEYS: [&str; 3] = ["window_animation_scale", "transition_animation_scale", "animator_duration_scale"];
 
-pub(super) fn apply_speed_settings(tw: &mut Tweaks, plan: &Plan) {
-    if plan.wants(Change::Animations)
-        && ANIMATION_KEYS.iter().filter(|k| tw.set("global", k, config::ANIMATION_SCALE)).count()
-            == ANIMATION_KEYS.len()
-    {
+/// Unset or 1x is Android's default. Anything else (off, faster, slower) is the owner's own choice.
+pub fn animation_is_default(value: &str) -> bool {
+    matches!(value.trim(), "" | "null") || value.trim().parse::<f64>().is_ok_and(|v| v == 1.0)
+}
+
+/// Faster animations, but only where they are still at the default.
+fn speed_up_animations(tw: &mut Tweaks) {
+    let at_default: Vec<&str> =
+        ANIMATION_KEYS.iter().copied().filter(|k| animation_is_default(&tw.adb.get_setting("global", k))).collect();
+    if at_default.is_empty() {
+        ui::dim("Animations left as the owner set them");
+    } else if at_default.iter().filter(|k| tw.set("global", k, config::ANIMATION_SCALE)).count() == at_default.len() {
         ui::ok("Animations 2x faster - the interface feels snappier");
+    }
+}
+
+pub(super) fn apply_speed_settings(tw: &mut Tweaks, plan: &Plan) {
+    if plan.wants(Change::Animations) {
+        speed_up_animations(tw);
     }
     if plan.wants(Change::Scanning)
         && tw.set("global", "wifi_scan_always_enabled", "0")
