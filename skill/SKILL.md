@@ -145,6 +145,11 @@ backups can bring removed apps back; run again if they did. Apps restored from t
   switch on screens that have one; deleting the advertising ID is the person's decision).
 - **Battery without root:** sysfs is often closed (Xiaomi); wear comes from `dumpsys batterystats`
   (`Estimated battery capacity` = design, `Max learned battery capacity` = real).
+- **Calls over VoLTE:** the per-SIM VoLTE switch (`content://telephony/siminfo`) and `cmd phone cc` are closed
+  to shell. Readable: `dumpsys carrier_config` (`carrier_volte_available_bool`, `carrier_wfc_ims_available_bool`)
+  and `dumpsys telephony.registry` (`mVoiceRegState=0(IN_SERVICE)`, `getRilVoiceRadioTechnology=14(LTE)`;
+  14/19/20 = VoLTE/VoNR, 18 = Wi-Fi calling, 16 = GSM, 3 = UMTS). Carrier offers VoLTE but voice runs on 2G/3G
+  = the switch is off: point the person to it (`Brand::volte_setting`). No SIM: `gsm.sim.state` = ABSENT.
 - **Calls "robotic" / not heard:** VoLTE (`settings get global volte_subscription0`), LTE signal
   (`dumpsys telephony.registry`), then a voice-recorder test: bad there too → microphone; fine → network.
 - **Telemetry:** MQS, analytics, MiSight and MTK Logger are fine to remove. Keep `com.xiaomi.mtb`,

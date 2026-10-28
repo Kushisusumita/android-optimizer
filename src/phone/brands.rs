@@ -111,6 +111,18 @@ impl Brand {
         steps
     }
 
+    /// Where the VoLTE switch usually is (names vary a little between system versions).
+    pub fn volte_setting(self) -> &'static str {
+        match self {
+            Brand::Samsung => "Settings -> Connections -> Mobile networks -> VoLTE calls",
+            Brand::Xiaomi => "Settings -> SIM cards & mobile networks -> your SIM -> VoLTE",
+            Brand::OppoRealmeOnePlus => "Settings -> Mobile network -> your SIM -> VoLTE",
+            Brand::Vivo => "Settings -> Mobile network -> your SIM -> VoLTE",
+            Brand::HuaweiHonor => "Settings -> Mobile network -> Mobile data -> VoLTE calls",
+            _ => "Settings -> Network & internet -> SIMs -> your SIM -> VoLTE / 4G calling",
+        }
+    }
+
     /// Where to find the build number (to enable Developer options).
     pub fn build_number_hint(self) -> &'static str {
         match self {

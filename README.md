@@ -57,6 +57,8 @@ Shows you **how the phone is doing**, before and after:
 - A real speed measurement: how long a few harmless system apps (Settings, Calendar, Clock…) take to open
   from cold — never your own apps — measured again only after the phone has cooled down.
 - How many apps with an icon are compiled.
+- Calls: whether they go over 4G/5G (VoLTE: faster to connect, clearer sound) or fall back to 2G/3G, and
+  where to turn VoLTE and Wi-Fi calling on for your phone's brand when the carrier offers them.
 - Progress through each stage (`[2/5] … 40% done`), the score so far, and **before/after results in words**:
   every row says better, worse, about the same or as expected, and why.
 

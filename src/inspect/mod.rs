@@ -2,6 +2,7 @@
 //! Nothing here changes the phone.
 
 pub mod adsource;
+pub mod calls;
 pub mod compiled;
 pub mod diagnostics;
 pub mod hardware;

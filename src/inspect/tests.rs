@@ -208,3 +208,37 @@ fn a_phone_with_default_settings_needs_no_repair() {
         leftovers::found(|_, key| if key == "always_finish_activities" { "0".into() } else { "1".into() }).is_empty()
     );
 }
+
+// ---------------------------------------------------------------- calls
+
+use super::calls::{self, Calls};
+
+const NO_SIM_REGISTRY: &str = "    mServiceState={mVoiceRegState=1(OUT_OF_SERVICE), mDataRegState=1(OUT_OF_SERVICE), getRilVoiceRadioTechnology=0(Unknown), getRilDataRadioTechnology=0(Unknown), IsVoiceCallAvailable=false}\n";
+
+#[test]
+fn reads_the_voice_network_from_the_telephony_registry() {
+    let none = calls::parse_voice(NO_SIM_REGISTRY);
+    assert_eq!((none[0].in_service, none[0].radio), (false, 0));
+    let lte = calls::parse_voice("mServiceState={mVoiceRegState=0(IN_SERVICE), getRilVoiceRadioTechnology=14(LTE)}");
+    assert_eq!((lte[0].in_service, lte[0].radio), (true, 14));
+}
+
+#[test]
+fn reads_what_the_carrier_offers() {
+    let cfg = "  carrier_volte_available_bool = false\n  carrier_wfc_ims_available_bool = true\n";
+    assert!(!calls::carrier_flag(cfg, "carrier_volte_available_bool"));
+    assert!(calls::carrier_flag(cfg, "carrier_wfc_ims_available_bool"));
+    assert!(calls::sim_present("READY,ABSENT"));
+    assert!(!calls::sim_present("ABSENT,ABSENT"));
+}
+
+#[test]
+fn tells_whether_calls_use_volte_or_fall_back() {
+    let lte = calls::parse_voice("mServiceState={mVoiceRegState=0(IN_SERVICE), getRilVoiceRadioTechnology=14(LTE)}");
+    let gsm = calls::parse_voice("mServiceState={mVoiceRegState=0(IN_SERVICE), getRilVoiceRadioTechnology=16(GSM)}");
+    assert_eq!(calls::assess(false, &[], true), Calls::NoSim);
+    assert_eq!(calls::assess(true, &calls::parse_voice(NO_SIM_REGISTRY), true), Calls::NoNetwork);
+    assert_eq!(calls::assess(true, &lte, true), Calls::OverVolte);
+    assert_eq!(calls::assess(true, &gsm, true), Calls::FallsBackVolteOff);
+    assert_eq!(calls::assess(true, &gsm, false), Calls::FallsBackNoVolte);
+}
