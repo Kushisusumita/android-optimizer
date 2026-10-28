@@ -1,0 +1,20 @@
+[package]
+name = "android-optimizer"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.87"
+description = "Clean up, debloat and speed up any Android phone over ADB - no root."
+license = "MIT"
+repository = "https://github.com/Kushisusumita/android-optimizer"
+readme = "README.md"
+# No external dependencies on purpose: the binary builds anywhere, offline, with just the Rust toolchain.
+
+[[bin]]
+name = "android-optimizer"
+path = "src/main.rs"
+
+[profile.release]
+opt-level = "z"
+lto = true
+strip = true
+panic = "abort"
