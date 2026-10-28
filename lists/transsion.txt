@@ -13,6 +13,13 @@ com.transsion.magazineservice       # Lock screen magazine - ads
 com.transsion.scanningrecharger     # Top-up by scanning a card
 com.transsion.tecnospot             # Tecno community
 com.idea.questionnaire              # Surveys
+com.transsion.trancare              # Sends device identifiers, installed apps and location
+com.transsion.hamal                 # After-sales logging, reads device identifiers and phone number
+com.transsion.stasticalsales        # After-sales telemetry
+com.transsion.teop                  # Test and log app
+com.transsion.magazineservice.hios  # Lock-screen feed with ads
+com.transsion.magazineservice.xos   # Lock-screen magazine with telemetry
+com.transsion.chromecustomization   # Uses the advertising ID to set the browser homepage
 
 [max]
 com.transsion.aivoiceassistant      # Voice assistant
@@ -21,3 +28,6 @@ com.transsion.healthlife            # Health
 com.transsion.smartpanel            # Smart panel
 com.zaz.translate                   # Hi Translate
 com.transsion.plat.appupdate        # System app updater (ads)
+com.transsion.magicshow             # Video player with ads
+com.transsion.filemanagerx          # File manager with trackers - install another file manager first
+com.infinix.xshare                  # File sharing with ads

@@ -10,8 +10,6 @@ com.miui.analytics.go               # Xiaomi analytics and telemetry
 com.miui.daemon                     # Diagnostics collection (MQS) - always runs in the background
 com.miui.misightservice             # MiSight - system event collection for Xiaomi (telemetry)
 com.xiaomi.security.onetrack        # OneTrack - Xiaomi usage analytics/telemetry
-com.xiaomi.aiservice                # Xiaomi AI engine with the OneTrack SDK (collects device IDs and usage)
-com.miui.cotaservice                # COTA config service - sends and receives data in the background
 com.miui.bugreport                  # Bug report uploader
 com.miui.miservice                  # Services & feedback
 com.xiaomi.mipicks                  # GetApps - app store with ads, pushes apps
@@ -37,6 +35,11 @@ com.mipay.wallet.id                 # Mi Pay (Indonesia)
 com.mi.globalbrowser                # Mi Browser - lots of ads @needs com.android.chrome
 com.mi.global.shop                  # Xiaomi Store - shop with ads and promos
 com.mi.global.bbs                   # Xiaomi Community (forum)
+com.miui.klo.bugreport              # Uploads system and app failure reports
+com.miui.wmsvc                      # Reads the Google advertising ID for Quick apps and analytics
+com.miui.spock                      # Background analytics
+android.romstats                    # Xiaomi telemetry
+com.huaqin.diaglogger               # Maker log menu, forwards Bluetooth logs to bug reports
 
 [max]
 com.miui.videoplayer                # Mi Video - ads (videos open in Gallery or Google Photos)
@@ -51,3 +54,8 @@ com.miui.voiceassist                # Xiao AI voice assistant (China firmware)
 com.miui.compass                    # Compass
 com.xiaomi.smarthome                # Mi Home - Xiaomi smart devices
 com.miui.fm                         # FM radio (needs wired headphones)
+com.facemoji.lite.xiaomi            # Facemoji keyboard with ads and analytics @needs com.google.android.inputmethod.latin
+com.mi.appfinder                    # App finder with trackers
+com.miui.antispam                   # Spam filter - call and SMS spam blocking stops
+com.xiaomi.aiservice                # Xiaomi AI engine with the OneTrack SDK (collects device IDs and usage)
+com.miui.cotaservice                # COTA config service - sends and receives data in the background

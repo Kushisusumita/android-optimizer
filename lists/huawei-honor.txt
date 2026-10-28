@@ -14,6 +14,15 @@ com.huawei.browser                  # Huawei browser - ads and news @needs com.a
 com.hihonor.android.tips            # Tips (Honor)
 com.hihonor.magazine                # Lock screen magazine (Honor)
 com.hihonor.browser                 # Honor browser - ads @needs com.android.chrome
+com.huawei.bd                       # HwUE analytics, collects app usage, starts at boot
+com.huawei.hwdetectrepair           # Smart diagnosis running in the background
+com.hihonor.detectrepair            # Smart diagnosis running in the background
+com.huawei.hwdiagnosis              # Diagnostics sent to Huawei
+com.huawei.contentsensor            # Collects installed-apps info
+com.huawei.betaclub                 # Beta logs and feedback
+com.huawei.autoinstallapkfrommcc    # Auto-installs apps by country
+com.hihonor.autoinstallapkfrommcc   # Auto-installs apps by country
+com.huawei.hitouch                  # HiTouch shopping search
 
 [max]
 com.huawei.gameassistant            # Game assistant
@@ -24,3 +33,6 @@ com.huawei.phoneservice             # Support
 com.hihonor.phoneservice            # Support (Honor)
 com.huawei.music                    # Music
 com.huawei.parentcontrol            # Parental control
+com.huawei.hiview                   # Log and crash dialogs
+com.hihonor.hiview                  # Log and crash dialogs
+com.huawei.android.chr              # Call and network history recording

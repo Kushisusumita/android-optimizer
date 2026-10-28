@@ -8,6 +8,9 @@ com.google.android.videos                   # Google TV / Play Movies
 com.google.android.apps.magazines           # Google News
 com.google.android.apps.books               # Google Play Books
 com.google.android.feedback                 # Google Feedback - sends feedback to Google
+com.google.android.apps.carrier.log # Carrier logging
+com.google.android.apps.betterbug   # Bug-report and feedback tool
+com.google.android.apps.internal.betterbug  # Internal bug-report tool
 
 [max]
 com.google.android.apps.youtube.music       # YouTube Music

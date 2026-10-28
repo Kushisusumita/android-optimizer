@@ -4,6 +4,13 @@
 [safe]
 com.motorola.demo                   # Store demo mode
 com.motorola.ccc.notification       # Motorola promo notifications
+com.motorola.bug2go                 # Uploads crash reports
+com.motorola.android.nativedropboxagent  # Developer logging agent
+com.motorola.android.settings.diag_mdlog  # Modem diagnostic logs to storage
+com.motorola.bach.modemstats        # Modem statistics and logs
+com.motorola.iqimotmetrics          # Hidden network diagnostics collection
+com.motorola.help.extlog            # Log collector
+com.motorola.wifi.motowifimetrics   # Wi-Fi statistics
 
 [max]
 com.motorola.genie                  # Moto Help

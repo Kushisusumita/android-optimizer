@@ -14,6 +14,23 @@ com.coloros.operationManual         # User manual
 com.heytap.browser                  # HeyTap browser - ads @needs com.android.chrome
 com.coloros.browser                 # ColorOS browser - ads @needs com.android.chrome
 com.nearme.browser                  # Oppo browser - ads @needs com.android.chrome
+com.oplus.crashbox                  # Failure reports, starts by itself
+com.oplus.logkit                    # Log and bug-report service
+com.coloros.logkit                  # Log app
+com.oppo.logkitservice              # Log service
+com.oppo.logkitsdservice            # Log service
+com.realme.logtool                  # Hidden log app
+com.oppo.criticallog                # Logs only
+com.oplus.qualityprotect            # Logs system usage
+com.oppo.qualityprotect             # Logs
+com.oem.oemlogkit                   # OnePlus LogKit (Wi-Fi, Bluetooth, GPS logging)
+com.oem.logkitsdservice             # LogKit service
+net.oneplus.odm                     # OnePlus Device Manager - device and app-usage analytics
+net.oneplus.odm.provider            # OnePlus Device Manager provider
+com.oneplus.opbugreportlite         # Sends battery, crash and freeze data every 6 hours
+net.oneplus.commonlogtool           # Log tool
+com.opos.cs                         # Home-screen folders of sponsored apps
+com.haokan.pictorial                # realme lock-screen ads
 
 [max]
 com.heytap.market                   # App Market - ads and pushed installs
@@ -25,3 +42,7 @@ com.coloros.assistantscreen         # Smart assistant (left screen feed)
 com.coloros.childrenspace           # Kids space
 com.heytap.mcs                      # HeyTap push (promotions)
 com.coloros.smartdrive              # Driving mode
+com.heytap.openid                   # Device and advertising identifiers - HeyTap Cloud may misbehave
+com.oplus.olc                       # Logger
+com.oplus.onetrace                  # Logger
+com.oplus.metis                     # Records user behaviour

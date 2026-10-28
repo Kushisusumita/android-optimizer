@@ -11,10 +11,14 @@ com.samsung.android.ardrawing           # AR Doodle
 com.samsung.android.kidsinstaller       # Samsung Kids installer
 com.samsung.android.app.watchmanagerstub # Galaxy Wearable stub
 com.samsung.android.mateagent           # Galaxy Friends
-com.samsung.android.dqagent             # Connection quality data collection (telemetry)
 com.samsung.android.ipsgeofence         # Visit In - location-based ads
 com.samsung.android.tvplus              # Samsung TV Plus
 com.samsung.sree                        # Samsung Global Goals - ads
+com.samsung.android.mapsagent       # Auto-installs recommended apps after setup or a reset
+com.sec.android.preloadinstaller    # Installs region preloads from a hidden partition on first boot
+com.samsung.preloadapp              # Installs recommended apps
+com.samsung.logwriter               # Writes a log database at boot
+com.samsung.android.networkdiagnostic  # Network telemetry, starts by itself
 
 [max]
 com.samsung.android.rubin.app           # Customization Service - data collection for personalization
@@ -35,3 +39,9 @@ com.samsung.android.livestickers        # Live stickers
 com.samsung.android.stickercenter       # Sticker center
 com.samsung.android.service.peoplestripe # People edge panel
 com.samsung.android.mdx                 # Link to Windows service
+com.samsung.android.app.omcagent    # Installs Recommended Apps; reports SIM changes to Samsung
+com.samsung.android.smartcallprovider  # Smart Call caller ID (Hiya) - caller ID and spam warnings stop
+com.hiya.star                       # Hiya caller-ID service - caller ID and spam warnings stop
+com.samsung.android.deviceidservice # Advertising ID provider (OAID)
+com.samsung.android.dsms            # Hidden diagnostic logging
+com.samsung.android.dqagent             # Connection quality data collection (telemetry)

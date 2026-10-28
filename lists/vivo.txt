@@ -8,6 +8,10 @@ com.vivo.magazine                   # Lock screen magazine - ads
 com.bbk.iqoo.feedback               # Feedback
 com.vivo.vivokaraoke                # Karaoke
 com.vivo.wallet                     # vivo wallet (China)
+com.bbk.iqoo.logsystem              # User-experience telemetry (trial system upgrades stop)
+com.android.bbklog                  # Log collection
+com.vivo.nps                        # User-experience survey program
+com.vivo.ewarranty                  # e-Warranty (China)
 
 [max]
 com.vivo.hiboard                    # Jovi Home - left screen feed
@@ -16,3 +20,5 @@ com.vivo.appstore                   # V-Appstore - ads and pushed installs
 com.vivo.game                       # Game center
 com.vivo.gamecube                   # Game center
 com.vivo.childrenmode               # Kids mode
+com.vivo.pushservice                # vivo push - notifications from vivo apps may stop
+com.vivo.hybrid                     # Quick apps

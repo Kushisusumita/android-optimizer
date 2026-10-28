@@ -37,6 +37,16 @@ com.gameloft.*                     # Gameloft games (preinstalled) @partner
 com.puzzlegames.puzzlebrickslegend # Puzzle Bricks Legend game (preinstalled, ad-supported) @partner
 com.vitastudio.mahjong             # Mahjong game (preinstalled, ad-supported) @partner
 com.block.juggle                   # Block Blast game (preinstalled, ad-supported) @partner
+android.autoinstalls.config.*       # Setup-time auto-install config - pushes maker apps after setup or a reset
+com.android.partnerbrowsercustomizations.*  # Partner browser homepage (the homepage goes back to the default)
+com.att.iqi                         # Carrier IQ diagnostics collector
+com.tmobile.pr.adapt                # T-Mobile diagnostics, reads installed apps, always running
+com.tmobile.echolocate              # T-Mobile diagnostics
+com.verizon.obdm                    # Verizon metrics module
+com.vzw.qualitydatalog              # Verizon logging service
+de.telekom.tsc                      # Telekom ads in the notification panel
+com.taboola.mip                     # Taboola lock-screen news and ad feed
+com.sprint.ce.updater               # Sprint force-installs carrier apps
 
 [max]
 com.android.browser                # Manufacturer's stock browser (often with ads) @needs com.android.chrome
