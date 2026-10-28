@@ -1,0 +1,45 @@
+name: Release
+
+# Pushing a tag like v0.1.0 builds a ready-to-run ZIP for each system and attaches it to a GitHub release,
+# so nobody needs Rust installed: unpack, then start.bat (Windows) or ./start.sh (Linux, macOS).
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            bin: android-optimizer.exe
+            launcher: start.bat
+            zip: android-optimizer-windows.zip
+          - os: ubuntu-latest
+            bin: android-optimizer
+            launcher: start.sh
+            zip: android-optimizer-linux.zip
+          - os: macos-latest
+            bin: android-optimizer
+            launcher: start.sh
+            zip: android-optimizer-macos.zip
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo test
+      - run: cargo build --release
+      - name: Package
+        shell: bash
+        run: |
+          mkdir dist
+          cp "target/release/${{ matrix.bin }}" "${{ matrix.launcher }}" README.md LICENSE dist/
+          cp -r lists dist/
+          cd dist
+          if command -v zip >/dev/null; then zip -qr "../${{ matrix.zip }}" .; else 7z a -bd "../${{ matrix.zip }}" . >/dev/null; fi
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ matrix.zip }}
