@@ -1,0 +1,25 @@
+use super::{apps, cleanup, settings};
+
+#[test]
+fn recognises_refusals_and_appops_modes() {
+    assert!(settings::refused("java.lang.SecurityException: Permission denial"));
+    assert!(!settings::refused(""));
+    assert_eq!(apps::parse_appops_mode("RUN_ANY_IN_BACKGROUND: ignore; time=+1d", "RUN_ANY_IN_BACKGROUND"), "ignore");
+    assert_eq!(apps::parse_appops_mode("RUN_ANY_IN_BACKGROUND: allow", "RUN_ANY_IN_BACKGROUND"), "allow");
+    assert_eq!(apps::parse_appops_mode("No operations.", "RUN_ANY_IN_BACKGROUND"), "default");
+}
+
+#[test]
+fn display_size_never_squeezes_the_screen_below_320dp() {
+    assert_eq!(settings::density_target(440, 1.10, 1080), 484);
+    assert_eq!(settings::density_target(440, 1.30, 720), 360);
+}
+
+#[test]
+fn parses_compile_progress_lines() {
+    let ok = cleanup::parse_compile_line("12/47 OK com.pkg").unwrap();
+    assert_eq!((ok.index, ok.total, ok.ok, ok.package.as_str()), (12, 47, true, "com.pkg"));
+    assert!(!cleanup::parse_compile_line("3/5 -- com.x").unwrap().ok);
+    assert!(cleanup::parse_compile_line("1/2 FAIL com.x").is_none());
+    assert!(cleanup::parse_compile_line("garbage").is_none());
+}

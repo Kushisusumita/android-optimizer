@@ -208,13 +208,13 @@ Pull requests are very welcome, especially coverage for more phone brands.
 - **Lists** live in [`lists/`](lists), one plain-text file per brand family. Format:
   `package.name  # description  [@needs replacement] [@partner] [@media]`.
   `[safe]` is removed by `optimize`, `[max]` by `max`. A new brand also goes into the brand registry in
-  [`src/brands.rs`](src/brands.rs) (detection, USB vendor ID, setup steps).
+  [`src/phone/brands.rs`](src/phone/brands.rs) (detection, USB vendor ID, setup steps).
 - Find package names with `adb shell pm list packages`. Good reference sources:
   [Universal Android Debloater NG](https://github.com/Universal-Debloater-Alliance/universal-android-debloater-next-generation)
   and its [package list](https://github.com/Universal-Debloater-Alliance/universal-android-preinstalled-lists).
 - `lists/malware.txt` is only for **documented** preinstalled malware/riskware — cite a source in the PR.
 - **When in doubt, leave a package out.** Leaving junk behind is better than breaking someone's phone.
-- **Code** is plain Rust with no dependencies, one responsibility per module (see [`src/main.rs`](src/main.rs)),
+- **Code** is plain Rust with no dependencies, organised in layers (see [Project structure](#project-structure)),
   written the [ub-mode](https://github.com/unclebob/ub-mode) way: a failing test first, small functions,
   one decision in one place, no dead code, no silenced warnings. Before a PR:
 
@@ -223,6 +223,29 @@ Pull requests are very welcome, especially coverage for more phone brands.
   ```
 
   and run `start.bat check` on a real phone before and after your change.
+
+## Project structure
+
+```
+start.bat, start.sh     double-click launchers (run the binary, or build it once)
+lists/                  package lists, one file per brand family (data, not code)
+skill/SKILL.md          instructions for AI coding assistants
+src/
+  main.rs               entry point; describes the layers
+  cli/                  arguments, the action menu, connecting to the phone
+  actions/              one action per file: optimize / max / check, speed up, restore
+  tune/                 what it changes, reversibly: settings, ad-blocking DNS, apps, cleanup
+  inspect/              what it reads, changing nothing: health, hardware, score, security, ad source
+  removal/              which packages may go: list parsing and the safety rules
+  host/                 the computer: project folders, reports, downloading adb
+  phone/                talking to the phone: adb, properties, packages, screen, USB, root
+  ui/                   all output and questions, colours, progress and charts
+  config.rs, util.rs    constants and parsed options; number parsing and dates
+```
+
+Each layer uses only the layers below it (`cli` → `actions` → `tune` → `inspect` → `removal` → `host` →
+`phone`); `ui`, `config` and `util` are used by all of them. Adb output is parsed once, in `phone`, into
+typed values the other layers trust. Tests live next to the code they cover, one `tests.rs` per layer.
 
 ## AI assistant
 

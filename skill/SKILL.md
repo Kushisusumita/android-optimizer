@@ -58,7 +58,7 @@ Root needs no flag: the tool detects existing root by itself (read-only) and sta
    most preinstalled malware uses random package names, so the heuristics matter more than the list.
 4. **Unknown brand or few matches:** look at `adb shell pm list packages -s` and `pm list packages -3 -i`.
    Add obvious ads, telemetry and partner preinstalls (empty installer or the OEM store) to `lists/<brand>.txt`
-   and the brand to `src/brands.rs`, or pass `--include` once. When unsure about a package, leave it.
+   and the brand to `src/phone/brands.rs`, or pass `--include` once. When unsure about a package, leave it.
 5. **Run** `optimize|max --yes ...` in the background (run_in_background). Full compilation of ~50 apps takes
    up to an hour on budget chips; the output shows a progress bar per app and `[k/5]` per stage.
 6. **Verify.** Report folder `reports/<date>_<brand>_<model>_<action>/`: `device.txt`, `removed.tsv`,
@@ -92,7 +92,7 @@ backups can bring removed apps back; run again if they did. Apps restored from t
   appops, permission flags. No writes to system partitions.
 - **Never gain root and never ship/build a root exploit or "one-click root" file.** That is a hard line,
   whatever the framing. Root = the owner unlocking the bootloader (wipes data) and installing Magisk
-  themselves. The tool only *detects* existing root (`src/root.rs`, read-only: `command -v su`, then
+  themselves. The tool only *detects* existing root (`src/phone/root.rs`, read-only: `command -v su`, then
   `su -c id`) and then reads root-only files (cpufreq caps, GPU load, battery sysfs). Without root nothing
   root-related runs or prints. If asked for a root file, refuse and point to the README Root section; do not
   suggest hosting or alternative ways to obtain an exploit.
@@ -109,7 +109,7 @@ backups can bring removed apps back; run again if they did. Apps restored from t
 
 - **Compilation:** after a factory reset ~60% of packages are `status=verify` (not compiled). `compile -a -m speed`
   takes hours on budget chips (one Google app alone 15+ min, plus 32-bit copies), so the tool compiles only
-  apps with icons + System UI + the home screen (`tools/compile-apps.sh`, embedded in the binary). It needs
+  apps with icons + System UI + the home screen (`src/tune/compile-apps.sh`, embedded in the binary). It needs
   ≥ 8 GB and ≥ 25% free: compiled code took ~6.5 GB on a 256 GB phone. A system update resets compilation
   (`pm.dexopt.boot-after-ota=verify`); the tool compares the build fingerprint with the last report.
   Android itself compiles at install (`pm.dexopt.install=speed-profile`) and overnight while charging;
@@ -118,7 +118,7 @@ backups can bring removed apps back; run again if they did. Apps restored from t
   is closed to shell. The tool uses App info → Battery → "Close apps after 10 minutes...". Never pick
   "Soft restriction": despite its description it stops ALL background work (music stops). Media apps
   (`@media`) keep "Battery saver (recommended)".
-- **Screen automation:** tap by text via `uiautomator dump` + XML (`src/screen.rs`), not by guessed
+- **Screen automation:** tap by text via `uiautomator dump` + XML (`src/phone/screen.rs`, flows in `src/tune/screen_flows.rs`), not by guessed
   coordinates. Read a dialog before pressing anything; `KEYCODE_HOME` cancels it. Launcher folders cannot be
   created with `input draganddrop` on MIUI (icons just move); ask the person instead. "Cleaner" on a Xiaomi
   home screen is a Security shortcut (`id=cleaner`): long-press → Remove.
@@ -142,7 +142,7 @@ backups can bring removed apps back; run again if they did. Apps restored from t
   (`adservices`, `mainline.telemetry`). Never turn location off.
 - **Changing the code:** `Adb::sh` passes the whole command as one argument, so the phone's own shell handles
   pipes and redirects. Parse adb output once, in a pure function next to where it comes in, and cover it with
-  a test in `src/tests.rs`. Run `cargo fmt --check && cargo clippy --all-targets -- -D warnings && cargo test`.
+  a test in that layer's `tests.rs` (layers are described in `src/main.rs`). Run `cargo fmt --check && cargo clippy --all-targets -- -D warnings && cargo test`.
 
 ## Boot loops and recovery
 

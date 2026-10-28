@@ -87,6 +87,32 @@ pub const APK_INSTALLERS: &[&str] = &[
     "com.samsung.android.packageinstaller",
 ];
 
+/// Everything the person asked for on the command line, parsed once (see `cli::args`).
+#[derive(Default)]
+pub struct Opts {
+    pub action: Option<Action>,
+    pub yes: bool,
+    pub help: bool,
+    pub version: bool,
+    pub serial: Option<String>,
+    pub connect: Option<String>,
+    pub pair: Option<String>,
+    pub pair_code: Option<String>,
+    pub exclude: Vec<String>,
+    pub include: Vec<String>,
+    pub background: Vec<String>,
+    pub mute: Vec<String>,
+    pub text_size: Option<TextSize>,
+    pub font_scale: Option<f64>,
+    pub display_scale: Option<f64>,
+    pub no_dns: bool,
+    pub no_compile: bool,
+    pub reboot: bool,
+    pub dns_host: Option<String>,
+    pub lists_dir: Option<String>,
+    pub adb_path: Option<String>,
+}
+
 /// What the user asked the tool to do.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Action {

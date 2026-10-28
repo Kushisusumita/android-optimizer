@@ -1,6 +1,17 @@
-//! Small standard-library helpers (dates without any external crate).
+//! Small standard-library helpers: reading numbers out of command output, and dates without a crate.
 
 use std::time::{SystemTime, UNIX_EPOCH};
+
+/// The integer at the start of the text, after leading spaces ("1800000 kHz" -> 1800000).
+pub fn leading_number(text: &str) -> Option<i64> {
+    let digits: String = text.trim().chars().take_while(|c| c.is_ascii_digit()).collect();
+    digits.parse().ok()
+}
+
+/// The first integer after `label` on any line ("MemTotal:   3800000 kB", "MemTotal:" -> 3800000).
+pub fn num_after(text: &str, label: &str) -> Option<i64> {
+    text.lines().find_map(|line| leading_number(&line[line.find(label)? + label.len()..]))
+}
 
 /// Days since 1970-01-01 for a civil date (Howard Hinnant's algorithm).
 pub fn days_from_civil(y: i64, m: i64, d: i64) -> i64 {
@@ -58,4 +69,27 @@ pub fn slug(s: &str) -> String {
         }
     }
     out.trim_matches('-').to_string()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn reads_numbers_out_of_command_output() {
+        assert_eq!(leading_number(" 1800000 kHz"), Some(1_800_000));
+        assert_eq!(leading_number("abc"), None);
+        assert_eq!(num_after("MemTotal:        3800000 kB", "MemTotal:"), Some(3_800_000));
+        assert_eq!(num_after("nothing", "MemTotal:"), None);
+    }
+
+    #[test]
+    fn dates_and_names() {
+        assert_eq!(days_from_civil(1970, 1, 1), 0);
+        assert_eq!(days_from_civil(2000, 3, 1), 11_017);
+        assert_eq!(parse_ymd_to_days("2024-03-01").unwrap() - parse_ymd_to_days("2024-02-28").unwrap(), 2);
+        assert_eq!(slug("Redmi Note 13 Pro+"), "Redmi-Note-13-Pro");
+        let stamp = now_utc_compact();
+        assert_eq!((stamp.len(), stamp.as_bytes()[10]), (19, b'_'));
+    }
 }

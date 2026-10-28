@@ -1,55 +1,31 @@
 //! Android Optimizer - clean up, debloat and speed up any Android phone over ADB, without root.
 //!
-//! One responsibility per module:
-//!   cli         - arguments, the menu, and each action's flow
-//!   config      - constants and option types (no magic values scattered around)
-//!   ui          - all terminal output and prompts
-//!   adb         - locating and driving the `adb` executable
-//!   platform_tools - downloading Google's adb when it is missing
-//!   usb         - recognising a phone on USB before debugging is on
-//!   device      - the phone: properties and installed packages, parsed once
-//!   root        - optional read-only extras when the owner rooted the phone
-//!   brands      - the brand registry: brand-exact instructions for every maker
-//!   lists       - the package lists in `lists/*.txt`
-//!   apps        - which packages may be removed, and why others are kept
-//!   perms       - apps holding powerful permissions
-//!   diagnostics - storage / RAM / battery / heat / stuck-key checks
-//!   hardware    - SoC, CPU, GPU, current load and app start time
-//!   score       - the health score and the before/after chart
-//!   security    - heuristic malware audit
-//!   adfinder    - the app behind pop-up ads
-//!   tweaks      - reversible settings, ad-blocking DNS, cleanup and compilation
-//!   screen      - tapping through settings adb cannot reach
-//!   report      - the per-run report and undo records
-//!   restore     - undo
-//!   paths, util - project folders; small helpers
+//! Layers, top to bottom. Each one uses only the layers below it:
+//!
+//!   cli      how a person drives it: arguments, the action menu, connecting to the phone
+//!   actions  one user-facing action per file: optimize / max / check, speed up, restore
+//!   tune     what it changes on the phone, always reversibly: settings, ad-blocking DNS, apps, cleanup
+//!   inspect  what it reads from the phone, changing nothing: health, hardware, score, security, ad source
+//!   removal  which packages may go: the lists and the safety rules applied to them
+//!   host     the computer: project folders, per-run reports, downloading adb
+//!   phone    talking to the phone: adb, properties, packages, screen, USB, root - raw output parsed once
+//!
+//! Used by every layer: `ui` (all output, questions, colours, charts), `config` (constants and the
+//! parsed options), `util` (number parsing, dates).
 
-mod adb;
-mod adfinder;
-mod apps;
-mod brands;
+mod actions;
 mod cli;
 mod config;
-mod device;
-mod diagnostics;
-mod hardware;
-mod lists;
-mod paths;
-mod perms;
-mod platform_tools;
-mod report;
-mod restore;
-mod root;
-mod score;
-mod screen;
-mod security;
-mod tweaks;
+mod host;
+mod inspect;
+mod phone;
+mod removal;
+mod tune;
 mod ui;
-mod usb;
 mod util;
 
 #[cfg(test)]
-mod tests;
+mod test_support;
 
 fn main() {
     std::process::exit(cli::run());
